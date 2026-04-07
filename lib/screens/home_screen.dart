@@ -6,6 +6,7 @@ import '../widgets/action_buttons.dart';
 import '../widgets/expense_chart.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/recent_transactions.dart';
+import 'transaction_history_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -36,11 +37,11 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: _buildBottomNav(context),
     );
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.background,
@@ -53,6 +54,14 @@ class HomeScreen extends StatelessWidget {
         selectedItemColor: AppColors.textPrimary,
         unselectedItemColor: Colors.white,
         currentIndex: 0,
+        onTap: (index) {
+          if (index == 2) { // Index 2 is 'Riwayat'
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TransactionHistoryScreen()),
+            );
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Transaksi'),
