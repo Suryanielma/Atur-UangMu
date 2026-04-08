@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
+import '../services/budget_service.dart';
+import '../services/dashboard_service.dart';
 import '../theme/app_colors.dart';
-import '../screens/budget_settings_screen.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
+  static final BudgetService _budgetService = BudgetService.instance;
+  static final DashboardService _dashboardService = DashboardService.instance;
+
   void _showNotification(BuildContext context) {
-    if (!globalNotif) {
+    final settings = _budgetService.getBudgetSettings();
+    if (!settings.notificationsEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Notifikasi dimatikan pada pengaturan budget.')),
+        const SnackBar(
+          content: Text('Notifikasi dimatikan pada pengaturan budget.'),
+        ),
       );
       return;
     }
-    
+
+    final shouldShowWarning = _budgetService.shouldShow80PercentAlert();
+    final warningMessage = _dashboardService.getBudgetWarningMessage();
+    final successMessage = _dashboardService.getTransactionLoggedMessage();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -21,10 +32,13 @@ class HomeHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (globalAlert80)
-              const Text('⚠️ Budget mendekati 80% dari batas bulanan Anda!', style: TextStyle(color: Colors.red)),
+            if (shouldShowWarning)
+              Text(
+                '⚠️ $warningMessage',
+                style: const TextStyle(color: Colors.red),
+              ),
             const SizedBox(height: 8),
-            const Text('✅ Berhasil mencatat 2 pengeluaran hari ini.'),
+            Text('✅ $successMessage'),
           ],
         ),
         actions: [
@@ -39,16 +53,21 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userDisplayName = _dashboardService.getUserDisplayName();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text('Selamat Datang', style: TextStyle(color: AppColors.textPrimary, fontSize: 14)),
-            SizedBox(height: 4),
+          children: [
+            const Text(
+              'Selamat Datang',
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
             Text(
-              'Halo, Pengguna!',
+              'Halo, $userDisplayName!',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,

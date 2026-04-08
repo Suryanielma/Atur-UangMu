@@ -1,88 +1,90 @@
 import 'package:flutter/material.dart';
+import '../data/in_memory_data_store.dart';
+import '../services/options_service.dart';
 import '../theme/app_colors.dart';
 
 class BankDialog extends StatelessWidget {
   final Function(String) onBankSelected;
+  static final OptionsService _optionsService = OptionsService.instance;
+  static final InMemoryDataStore _store = InMemoryDataStore.instance;
 
   const BankDialog({super.key, required this.onBankSelected});
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3D8E5), // Light pinkish background matching the image
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Search Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  icon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Cari Bank....',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-              ),
+    return AnimatedBuilder(
+      animation: _store,
+      builder: (context, _) {
+        final banks = _optionsService.getBankOptions();
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3D8E5),
+              borderRadius: BorderRadius.circular(24),
             ),
-            const SizedBox(height: 16),
-            // Tambah Bank Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  _showAddBankDialog(context);
-                },
-                icon: const Icon(Icons.add, color: AppColors.textPrimary),
-                label: const Text(
-                  'Tambah Bank',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(16),
                   ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.search, color: Colors.grey),
+                      hintText: 'Cari Bank....',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      _showAddBankDialog(context);
+                    },
+                    icon: const Icon(Icons.add, color: AppColors.textPrimary),
+                    label: const Text(
+                      'Tambah Bank',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: banks.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return _buildBankItem(banks[index], context);
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            // Bank List
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  _buildBankItem('BCA', context),
-                  const SizedBox(height: 12),
-                  _buildBankItem('BRI', context),
-                  const SizedBox(height: 12),
-                  _buildBankItem('Mandiri', context),
-                  const SizedBox(height: 12),
-                  _buildBankItem('BNI', context),
-                  const SizedBox(height: 12),
-                  _buildBankItem('BSI', context),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -95,7 +97,7 @@ class BankDialog extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -150,10 +152,7 @@ class BankDialog extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Text(
                   'Nama Bank',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -168,7 +167,10 @@ class BankDialog extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   onChanged: (value) {
                     newBankName = value;
@@ -188,7 +190,9 @@ class BankDialog extends StatelessWidget {
                     ),
                     onPressed: () {
                       if (newBankName.trim().isNotEmpty) {
-                        onBankSelected(newBankName.trim());
+                        final bankName = newBankName.trim();
+                        _optionsService.addBankOption(bankName);
+                        onBankSelected(bankName);
                         // Pop both dialogs (add bank dialog and the bank list dialog)
                         Navigator.pop(context);
                         Navigator.pop(context);

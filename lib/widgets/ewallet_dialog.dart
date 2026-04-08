@@ -1,86 +1,90 @@
 import 'package:flutter/material.dart';
+import '../data/in_memory_data_store.dart';
+import '../services/options_service.dart';
 import '../theme/app_colors.dart';
 
 class EWalletDialog extends StatelessWidget {
   final Function(String) onEWalletSelected;
+  static final OptionsService _optionsService = OptionsService.instance;
+  static final InMemoryDataStore _store = InMemoryDataStore.instance;
 
   const EWalletDialog({super.key, required this.onEWalletSelected});
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3D8E5), // Light pinkish background
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Search Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  icon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Cari E-Wallet....',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-              ),
+    return AnimatedBuilder(
+      animation: _store,
+      builder: (context, _) {
+        final eWallets = _optionsService.getEWalletOptions();
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3D8E5),
+              borderRadius: BorderRadius.circular(24),
             ),
-            const SizedBox(height: 16),
-            // Tambah E-Wallet Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  _showAddEWalletDialog(context);
-                },
-                icon: const Icon(Icons.add, color: AppColors.textPrimary),
-                label: const Text(
-                  'Tambah E-Wallet',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(16),
                   ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.search, color: Colors.grey),
+                      hintText: 'Cari E-Wallet....',
+                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      _showAddEWalletDialog(context);
+                    },
+                    icon: const Icon(Icons.add, color: AppColors.textPrimary),
+                    label: const Text(
+                      'Tambah E-Wallet',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: eWallets.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return _buildEWalletItem(eWallets[index], context);
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            // E-Wallet List
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  _buildEWalletItem('GoPay', context),
-                  const SizedBox(height: 12),
-                  _buildEWalletItem('OVO', context),
-                  const SizedBox(height: 12),
-                  _buildEWalletItem('DANA', context),
-                  const SizedBox(height: 12),
-                  _buildEWalletItem('ShopeePay', context),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -93,7 +97,7 @@ class EWalletDialog extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -101,7 +105,11 @@ class EWalletDialog extends StatelessWidget {
             const CircleAvatar(
               backgroundColor: Color(0xFFE8F0FE),
               radius: 20,
-              child: Icon(Icons.account_balance_wallet, color: Colors.purple, size: 20),
+              child: Icon(
+                Icons.account_balance_wallet,
+                color: Colors.purple,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -148,10 +156,7 @@ class EWalletDialog extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Text(
                   'Nama E-Wallet',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -166,7 +171,10 @@ class EWalletDialog extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   onChanged: (value) {
                     newEWalletName = value;
@@ -186,7 +194,9 @@ class EWalletDialog extends StatelessWidget {
                     ),
                     onPressed: () {
                       if (newEWalletName.trim().isNotEmpty) {
-                        onEWalletSelected(newEWalletName.trim());
+                        final walletName = newEWalletName.trim();
+                        _optionsService.addEWalletOption(walletName);
+                        onEWalletSelected(walletName);
                         Navigator.pop(context);
                         Navigator.pop(context);
                       }

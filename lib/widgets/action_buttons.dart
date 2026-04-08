@@ -11,21 +11,49 @@ class ActionButtons extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildButton('Catat Transaksi', Icons.add, AppColors.buttonBg, AppColors.expenseRed, onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
-          }),
+          child: _buildButton(
+            'Catat Transaksi',
+            Icons.add,
+            AppColors.buttonBg,
+            AppColors.expenseRed,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddTransactionScreen(),
+                ),
+              );
+            },
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildButton('Atur Budget', Icons.account_balance_wallet, AppColors.buttonBgPurple, AppColors.textPrimary, onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()));
-          }),
+          child: _buildButton(
+            'Atur Budget',
+            Icons.account_balance_wallet,
+            AppColors.buttonBgPurple,
+            AppColors.textPrimary,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BudgetSettingsScreen(),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildButton(String label, IconData icon, Color bgColor, Color iconColor, {VoidCallback? onTap}) {
+  Widget _buildButton(
+    String label,
+    IconData icon,
+    Color bgColor,
+    Color iconColor, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -37,14 +65,17 @@ class ActionButtons extends StatelessWidget {
         child: Column(
           children: [
             CircleAvatar(
-              backgroundColor: iconColor.withOpacity(0.2),
+              backgroundColor: iconColor.withValues(alpha: 0.2),
               child: Icon(icon, color: iconColor),
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-            )
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),

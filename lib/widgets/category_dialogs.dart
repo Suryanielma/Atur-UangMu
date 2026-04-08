@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import '../services/options_service.dart';
 import '../theme/app_colors.dart';
 
 class CategoryDialog extends StatelessWidget {
   final Function(String) onCategorySelected;
+  static final OptionsService _optionsService = OptionsService.instance;
 
-  const CategoryDialog({
-    super.key,
-    required this.onCategorySelected,
-  });
+  const CategoryDialog({super.key, required this.onCategorySelected});
 
   @override
   Widget build(BuildContext context) {
+    final categories = _optionsService.getExpenseCategories();
+
     return Dialog(
       backgroundColor: AppColors.cardBackgroundPurple,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -39,12 +38,19 @@ class CategoryDialog extends StatelessWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 0.85,
               children: [
-                _buildDialogItem(context, 'Listrik', Icons.flash_on),
-                _buildDialogItem(context, 'Air', Icons.water_drop),
-                _buildDialogItem(context, 'Pulsa', Icons.smartphone),
-                _buildDialogItem(context, 'Asuransi', Icons.verified),
-                _buildDialogItem(context, 'Belanja', Icons.shopping_bag),
-                _buildDialogItem(context, 'Kategori\nBaru', Icons.add_circle),
+                ...categories.map(
+                  (name) => _buildDialogItem(
+                    context,
+                    name,
+                    _resolveCategoryIcon(name),
+                  ),
+                ),
+                _buildDialogItem(
+                  context,
+                  'Kategori\nBaru',
+                  Icons.add_circle,
+                  isCreateAction: true,
+                ),
               ],
             ),
           ],
@@ -53,10 +59,15 @@ class CategoryDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDialogItem(BuildContext context, String title, IconData icon) {
+  Widget _buildDialogItem(
+    BuildContext context,
+    String title,
+    IconData icon, {
+    bool isCreateAction = false,
+  }) {
     return GestureDetector(
       onTap: () {
-        if (title.contains('Kategori\nBaru')) {
+        if (isCreateAction) {
           Navigator.pop(context); // Close the current dialog
           _showNewCategoryDialog(context);
         } else {
@@ -77,10 +88,7 @@ class CategoryDialog extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF4A5568),
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
             ),
           ],
         ),
@@ -88,13 +96,31 @@ class CategoryDialog extends StatelessWidget {
     );
   }
 
+  IconData _resolveCategoryIcon(String categoryName) {
+    final lower = categoryName.toLowerCase();
+    if (lower.contains('listrik')) {
+      return Icons.flash_on;
+    }
+    if (lower.contains('air')) {
+      return Icons.water_drop;
+    }
+    if (lower.contains('pulsa')) {
+      return Icons.smartphone;
+    }
+    if (lower.contains('asuransi')) {
+      return Icons.verified;
+    }
+    if (lower.contains('belanja')) {
+      return Icons.shopping_bag;
+    }
+    return Icons.category;
+  }
+
   void _showNewCategoryDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return NewCategoryDialog(
-          onCategorySaved: onCategorySelected,
-        );
+        return NewCategoryDialog(onCategorySaved: onCategorySelected);
       },
     );
   }
@@ -103,10 +129,7 @@ class CategoryDialog extends StatelessWidget {
 class NewCategoryDialog extends StatefulWidget {
   final Function(String) onCategorySaved;
 
-  const NewCategoryDialog({
-    super.key,
-    required this.onCategorySaved,
-  });
+  const NewCategoryDialog({super.key, required this.onCategorySaved});
 
   @override
   State<NewCategoryDialog> createState() => _NewCategoryDialogState();
@@ -149,9 +172,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: AppColors.cardBackgroundPurple,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -169,10 +190,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             const SizedBox(height: 16),
             const Text(
               'Pilih Ikon',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
             ),
             const SizedBox(height: 8),
             Container(
@@ -200,15 +218,21 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.buttonBg : Colors.transparent,
+                        color: isSelected
+                            ? AppColors.buttonBg
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected ? AppColors.textPrimary : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.textPrimary
+                              : Colors.transparent,
                         ),
                       ),
                       child: Icon(
                         icon,
-                        color: isSelected ? AppColors.textPrimary : Colors.grey[700],
+                        color: isSelected
+                            ? AppColors.textPrimary
+                            : Colors.grey[700],
                       ),
                     ),
                   );
@@ -218,10 +242,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             const SizedBox(height: 16),
             const Text(
               'Nama Kategori',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -234,7 +255,10 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -250,8 +274,11 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
-                  if (tempSelectedIcon != null && nameController.text.isNotEmpty) {
-                    widget.onCategorySaved(nameController.text);
+                  if (tempSelectedIcon != null &&
+                      nameController.text.isNotEmpty) {
+                    final categoryName = nameController.text.trim();
+                    OptionsService.instance.addExpenseCategory(categoryName);
+                    widget.onCategorySaved(categoryName);
                     Navigator.pop(context);
                   }
                 },

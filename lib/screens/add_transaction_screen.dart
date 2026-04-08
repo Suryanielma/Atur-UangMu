@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../services/options_service.dart';
+import '../services/transaction_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/no_animation_route.dart';
+import '../utils/app_formatters.dart';
 import '../widgets/category_dialogs.dart';
 import '../widgets/bank_dialog.dart';
 import '../widgets/ewallet_dialog.dart';
@@ -15,9 +18,25 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final OptionsService _optionsService = OptionsService.instance;
+  final TransactionService _transactionService = TransactionService.instance;
+
   bool isIncome = true;
-  String selectedCategory = 'Gaji';
+  String selectedCategory = '';
   String selectedMethod = 'Cash';
+  DateTime? selectedDate;
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final incomeCategories = _optionsService.getIncomeCategories();
+    selectedCategory = incomeCategories.isNotEmpty
+        ? incomeCategories.first
+        : 'Lainnya';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +94,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: isIncome
-                    ? AppColors.incomeBg.withOpacity(0.5)
-                    : Colors.white.withOpacity(0.5),
+                    ? AppColors.incomeBg.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isIncome ? AppColors.incomeGreen : Colors.transparent,
@@ -111,8 +130,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: !isIncome
-                    ? AppColors.expenseBg.withOpacity(0.5)
-                    : Colors.white.withOpacity(0.5),
+                    ? AppColors.expenseBg.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: !isIncome ? AppColors.expenseRed : Colors.transparent,
@@ -171,6 +190,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
+                  controller: _amountController,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 32,
@@ -192,6 +212,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildCategorySection() {
+    final incomeCategories = _optionsService.getIncomeCategories();
+    final topCategories = incomeCategories.take(4).toList(growable: false);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -210,15 +233,34 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCategoryItem('Gaji', Icons.work),
-              _buildCategoryItem('Bonus', Icons.card_giftcard),
-              _buildCategoryItem('Investasi', Icons.show_chart),
-              _buildCategoryItem('Lainnya', Icons.more_horiz),
+              ...topCategories.map(
+                (category) => _buildCategoryItem(
+                  category,
+                  _resolveCategoryIcon(category),
+                ),
+              ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  IconData _resolveCategoryIcon(String category) {
+    final lower = category.toLowerCase();
+    if (lower.contains('gaji')) {
+      return Icons.work;
+    }
+    if (lower.contains('bonus')) {
+      return Icons.card_giftcard;
+    }
+    if (lower.contains('investasi')) {
+      return Icons.show_chart;
+    }
+    if (lower.contains('lain')) {
+      return Icons.more_horiz;
+    }
+    return Icons.category;
   }
 
   Widget _buildCategoryItem(String title, IconData icon) {
@@ -234,7 +276,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         width: 70,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.textPrimary : Colors.transparent,
@@ -354,16 +398,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     bool hasArrow = false,
     VoidCallback? onTapOverride,
   }) {
+    final bankOptions = _optionsService.getBankOptions();
+    final eWalletOptions = _optionsService.getEWalletOptions();
+
     // Treat selectedMethod as selected if it matches title OR if title is 'Bank' and we have selected a bank
     // OR if title is 'E-Wallet' and we have selected an E-Wallet
-    bool isSelected = selectedMethod == title || 
-                     (title == 'Bank' && ['BCA', 'BRI', 'Mandiri', 'BNI', 'BSI'].contains(selectedMethod)) ||
-                     (title == 'E-Wallet' && ['GoPay', 'OVO', 'DANA', 'ShopeePay'].contains(selectedMethod));
-                     
+    bool isSelected =
+        selectedMethod == title ||
+        (title == 'Bank' && bankOptions.contains(selectedMethod)) ||
+        (title == 'E-Wallet' && eWalletOptions.contains(selectedMethod));
+
     String displayTitle = title;
     if (title == 'Bank' && isSelected && selectedMethod != 'Bank') {
       displayTitle = selectedMethod;
-    } else if (title == 'E-Wallet' && isSelected && selectedMethod != 'E-Wallet') {
+    } else if (title == 'E-Wallet' &&
+        isSelected &&
+        selectedMethod != 'E-Wallet') {
       displayTitle = selectedMethod;
     }
 
@@ -372,7 +422,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.textPrimary : Colors.transparent,
@@ -382,7 +434,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: iconColor.withOpacity(0.2),
+              backgroundColor: iconColor.withValues(alpha: 0.2),
               radius: 16,
               child: Icon(icon, color: iconColor, size: 16),
             ),
@@ -429,6 +481,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _dateController,
+                    readOnly: true,
+                    onTap: _selectDate,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: 'mm/dd/yyyy',
@@ -439,13 +494,39 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ),
                   ),
                 ),
-                const Icon(Icons.calendar_month, color: Colors.grey),
+                GestureDetector(
+                  onTap: _selectDate,
+                  child: const Icon(Icons.calendar_month, color: Colors.grey),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = formatDateInput(picked);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _notesController.dispose();
+    _dateController.dispose();
+    super.dispose();
   }
 
   Widget _buildNotesSection() {
@@ -470,7 +551,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const TextField(
+            child: TextField(
+              controller: _notesController,
               maxLines: 3,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -490,7 +572,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: _saveTransaction,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.cardBackgroundPurple,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -530,6 +612,29 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
       ],
     );
+  }
+
+  void _saveTransaction() {
+    final amount = _transactionService.parseAmount(_amountController.text);
+    if (amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Masukkan nominal transaksi terlebih dahulu.'),
+        ),
+      );
+      return;
+    }
+
+    _transactionService.addTransaction(
+      isIncome: isIncome,
+      amount: amount,
+      category: selectedCategory,
+      paymentMethod: selectedMethod,
+      transactionDate: selectedDate ?? DateTime.now(),
+      note: _notesController.text.trim(),
+    );
+
+    Navigator.pop(context);
   }
 
   Widget _buildBottomNav() {
