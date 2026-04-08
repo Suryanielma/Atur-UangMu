@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import 'home_screen.dart';
+import 'add_transaction_screen.dart';
+import 'transaction_history_screen.dart';
 
 class BudgetSettingsScreen extends StatefulWidget {
   const BudgetSettingsScreen({super.key});
@@ -217,16 +221,40 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   }
 
   Widget _bottomNav() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed, currentIndex: 3, 
-      selectedItemColor: const Color(0xFF402273), unselectedItemColor: Colors.grey,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
-        BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Transaksi"),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: "Riwayat"),
-        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: "Budget"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-      ],
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed, 
+        currentIndex: 3, 
+        selectedItemColor: AppColors.textPrimary, 
+        unselectedItemColor: Colors.white,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TransactionHistoryScreen()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Transaksi"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Riwayat"),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: "Budget"),
+        ],
+      ),
     );
   }
 }

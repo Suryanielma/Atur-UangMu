@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'add_transaction_screen.dart';
+import 'budget_settings_screen.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -473,7 +475,21 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         currentIndex: 2, // 2 = Riwayat
         onTap: (index) {
           if (index == 0) {
-            Navigator.pop(context); // Kembali ke Beranda / tutup layar Riwayat
+            Navigator.popUntil(context, (route) => route.isFirst); // Kembali ke Beranda
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddTransactionScreen(),
+              ),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BudgetSettingsScreen(),
+              ),
+            );
           }
         },
         items: const [
@@ -481,7 +497,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Transaksi'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
           BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Budget'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );

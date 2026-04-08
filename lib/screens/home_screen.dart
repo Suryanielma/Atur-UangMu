@@ -8,6 +8,7 @@ import '../widgets/budget_card.dart';
 import '../widgets/recent_transactions.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart'; // Sudah ter-import
+import 'add_transaction_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -72,7 +73,14 @@ class HomeScreen extends StatelessWidget {
         unselectedItemColor: Colors.white,
         currentIndex: 0, // Indeks 0 menandakan kita sedang di Beranda
         onTap: (index) {
-          if (index == 2) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddTransactionScreen(),
+              ),
+            );
+          } else if (index == 2) {
             // Navigasi ke Riwayat Transaksi
             Navigator.push(
               context,
@@ -80,9 +88,8 @@ class HomeScreen extends StatelessWidget {
                 builder: (context) => const TransactionHistoryScreen(),
               ),
             );
-          }
-          // PERBAIKAN: Navigasi ke Pengaturan Budget (Indeks 3)
-          else if (index == 3) {
+          } else if (index == 3) {
+            // Navigasi ke Pengaturan Budget
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -102,8 +109,7 @@ class HomeScreen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Budget',
-          ), // Item menu Budget
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+          ),
         ],
       ),
     );

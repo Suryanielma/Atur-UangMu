@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'transaction_history_screen.dart';
+import 'budget_settings_screen.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -458,16 +460,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildBottomNav() {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black12, width: 1)),
+        color: AppColors.background,
+        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 1, // Focus on "Transaksi" based on the image
+        selectedItemColor: AppColors.textPrimary,
+        unselectedItemColor: Colors.white,
+        currentIndex: 1, // Focus on "Transaksi"
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TransactionHistoryScreen()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()),
+            );
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(
@@ -479,7 +496,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             icon: Icon(Icons.account_balance_wallet),
             label: 'Budget',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );
