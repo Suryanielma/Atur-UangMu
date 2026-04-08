@@ -68,14 +68,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: isIncome ? AppColors.incomeBg.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                color: isIncome
+                    ? AppColors.incomeBg.withOpacity(0.5)
+                    : Colors.white.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: isIncome ? AppColors.incomeGreen : Colors.transparent),
+                border: Border.all(
+                  color: isIncome ? AppColors.incomeGreen : Colors.transparent,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_downward, color: isIncome ? AppColors.incomeGreen : Colors.grey, size: 20),
+                  Icon(
+                    Icons.arrow_downward,
+                    color: isIncome ? AppColors.incomeGreen : Colors.grey,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Pemasukan',
@@ -96,14 +104,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: !isIncome ? AppColors.expenseBg.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                color: !isIncome
+                    ? AppColors.expenseBg.withOpacity(0.5)
+                    : Colors.white.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: !isIncome ? AppColors.expenseRed : Colors.transparent),
+                border: Border.all(
+                  color: !isIncome ? AppColors.expenseRed : Colors.transparent,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_upward, color: !isIncome ? AppColors.expenseRed : Colors.grey, size: 20),
+                  Icon(
+                    Icons.arrow_upward,
+                    color: !isIncome ? AppColors.expenseRed : Colors.grey,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Pengeluaran',
@@ -132,17 +148,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Jumlah Uang', style: TextStyle(color: AppColors.textPrimary)),
+          const Text(
+            'Jumlah Uang',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           Row(
             children: [
               const Text(
                 'Rp',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 32, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -169,7 +196,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kategori', style: TextStyle(color: AppColors.textPrimary)),
+          const Text(
+            'Kategori',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -179,7 +209,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _buildCategoryItem('Investasi', Icons.show_chart),
               _buildCategoryItem('Lainnya', Icons.more_horiz),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -195,13 +225,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.textPrimary : Colors.transparent, width: 1),
+          border: Border.all(
+            color: isSelected ? AppColors.textPrimary : Colors.transparent,
+            width: 1,
+          ),
         ),
         child: Column(
           children: [
             Icon(icon, color: AppColors.textPrimary),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12)),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
       ),
@@ -219,19 +258,37 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Metode Pembayaran', style: TextStyle(color: AppColors.textPrimary)),
+          const Text(
+            'Metode Pembayaran',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 16),
           _buildPaymentItem('Cash', Icons.money, Colors.green),
           const SizedBox(height: 12),
-          _buildPaymentItem('Bank', Icons.account_balance, Colors.blue, hasArrow: true),
+          _buildPaymentItem(
+            'Bank',
+            Icons.account_balance,
+            Colors.blue,
+            hasArrow: true,
+          ),
           const SizedBox(height: 12),
-          _buildPaymentItem('E-Wallet', Icons.account_balance_wallet, Colors.purple, hasArrow: true),
+          _buildPaymentItem(
+            'E-Wallet',
+            Icons.account_balance_wallet,
+            Colors.purple,
+            hasArrow: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentItem(String title, IconData icon, Color iconColor, {bool hasArrow = false}) {
+  Widget _buildPaymentItem(
+    String title,
+    IconData icon,
+    Color iconColor, {
+    bool hasArrow = false,
+  }) {
     bool isSelected = selectedMethod == title;
     return GestureDetector(
       onTap: () => setState(() => selectedMethod = title),
@@ -240,7 +297,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.textPrimary : Colors.transparent, width: 1),
+          border: Border.all(
+            color: isSelected ? AppColors.textPrimary : Colors.transparent,
+            width: 1,
+          ),
         ),
         child: Row(
           children: [
@@ -251,10 +311,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                ),
+              ),
             ),
-            if (hasArrow)
-              const Icon(Icons.chevron_right, color: Colors.grey),
+            if (hasArrow) const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
       ),
@@ -272,7 +337,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Tanggal Transaksi', style: TextStyle(color: AppColors.textPrimary)),
+          const Text(
+            'Tanggal Transaksi',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -287,14 +355,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: 'mm/dd/yyyy',
-                      hintStyle: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+                      hintStyle: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
                 const Icon(Icons.calendar_month, color: Colors.grey),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -311,7 +382,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Catatan Tambahan (Opsional)', style: TextStyle(color: AppColors.textPrimary)),
+          const Text(
+            'Catatan Tambahan (Opsional)',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -327,7 +401,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 hintStyle: TextStyle(color: AppColors.textPrimary),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -343,10 +417,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.cardBackgroundPurple,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 0,
             ),
-            child: const Text('Simpan Transaksi', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Simpan Transaksi',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -357,10 +440,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.cardBackground,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 0,
             ),
-            child: const Text('Batal', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+            ),
           ),
         ),
       ],
@@ -382,9 +470,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         currentIndex: 1, // Focus on "Transaksi" based on the image
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Transaksi'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Transaksi',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Budget'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Budget',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
