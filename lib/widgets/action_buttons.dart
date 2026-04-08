@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../screens/add_transaction_screen.dart';
+import '../screens/budget_settings_screen.dart';
 
 class ActionButtons extends StatelessWidget {
   const ActionButtons({super.key});
@@ -16,7 +17,9 @@ class ActionButtons extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildButton('Atur Budget', Icons.account_balance_wallet, AppColors.buttonBgPurple, AppColors.textPrimary),
+          child: _buildButton('Atur Budget', Icons.account_balance_wallet, AppColors.buttonBgPurple, AppColors.textPrimary, onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()));
+          }),
         ),
       ],
     );

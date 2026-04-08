@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-class BalanceCard extends StatelessWidget {
+class BalanceCard extends StatefulWidget {
   const BalanceCard({super.key});
+
+  @override
+  State<BalanceCard> createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<BalanceCard> {
+  bool _isBalanceVisible = true;
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +24,26 @@ class BalanceCard extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('Total Saldo', style: TextStyle(color: AppColors.textSecondary)),
-              Icon(Icons.remove_red_eye, color: AppColors.textSecondary, size: 20),
+            children: [
+              const Text('Total Saldo', style: TextStyle(color: AppColors.textSecondary)),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isBalanceVisible = !_isBalanceVisible;
+                  });
+                },
+                child: Icon(
+                  _isBalanceVisible ? Icons.visibility : Icons.visibility_off, 
+                  color: AppColors.textSecondary, 
+                  size: 20
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Rp 8.750.000',
-            style: TextStyle(
+          Text(
+            _isBalanceVisible ? 'Rp 8.750.000' : 'Rp *********',
+            style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 32,
               fontWeight: FontWeight.bold,

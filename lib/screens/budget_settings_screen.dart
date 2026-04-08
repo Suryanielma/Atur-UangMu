@@ -11,6 +11,12 @@ class BudgetSettingsScreen extends StatefulWidget {
   State<BudgetSettingsScreen> createState() => _BudgetSettingsScreenState();
 }
 
+// Global settings for demo purposes
+bool globalNotif = true;
+bool globalAlert80 = true;
+bool globalReset = true;
+double globalBudgetUtama = 5000000;
+
 class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   final Color warnaBackground = const Color.fromARGB(255, 246, 171, 219);
   final Color warnaKartu = const Color(0xFFFCEEF6); // Pink sangat muda untuk kartu
@@ -20,13 +26,51 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   final Color merahAlert = const Color(0xFFFF5252); // Warna bar hiburan
 
   // --- DATA STATE ---
-  double _budgetUtama = 5000000;
-  bool _notif = true;
-  bool _alert80 = true;
-  bool _reset = true;
+  final double _totalPakaiGlobal = 2650000.0; // Anggap total pengeluaran sudah segini untuk demo
+
+  List<Map<String, dynamic>> _kategoriData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _kategoriData = [
+      {"nama": "Makanan", "limit": 1000000.0, "pakai": 650000.0, "warnaBar": const Color(0xFFFF8C42), "ikon": Icons.fastfood},
+      {"nama": "Transport", "limit": 500000.0, "pakai": 320000.0, "warnaBar": const Color(0xFF2196F3), "ikon": Icons.drive_eta},
+      {"nama": "Hiburan", "limit": 300000.0, "pakai": 280000.0, "warnaBar": const Color(0xFFFF5252), "ikon": Icons.face},
+      {"nama": "Pakaian", "limit": 400000.0, "pakai": 120000.0, "warnaBar": const Color(0xFF4CAF50), "ikon": Icons.checkroom},
+    ];
+  }
+
+  void _showEditCategoryDialog(int index) {
+    TextEditingController controller = TextEditingController(text: _kategoriData[index]['limit'].toInt().toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Edit Budget ${_kategoriData[index]['nama']}", style: TextStyle(color: unguTua, fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(prefixText: "Rp "),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Batal")),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _kategoriData[index]['limit'] = double.tryParse(controller.text) ?? _kategoriData[index]['limit'];
+              });
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
+            child: const Text("Simpan", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showEditDialog() {
-    TextEditingController controller = TextEditingController(text: _budgetUtama.toInt().toString());
+    TextEditingController controller = TextEditingController(text: globalBudgetUtama.toInt().toString());
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -40,7 +84,9 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Batal")),
           ElevatedButton(
             onPressed: () {
-              setState(() => _budgetUtama = double.tryParse(controller.text) ?? _budgetUtama);
+              setState(() {
+                globalBudgetUtama = double.tryParse(controller.text) ?? globalBudgetUtama;
+              });
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
@@ -75,15 +121,9 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
 
             _header("Budget per Kategori", "+ Tambah"),
             const SizedBox(height: 15),
-            _itemKategori("Makanan", "Rp 1.000.000", "Rp 650.000", "Rp 350.000", 0.65, const Color(0xFFFF8C42), Icons.fastfood, true),
-            const SizedBox(height: 10),
-            _itemKategori("Transport", "Rp 500.000", "Rp 320.000", "Rp 180.000", 0.64, const Color(0xFF2196F3), Icons.drive_eta, true),
-            const SizedBox(height: 10),
-            _itemKategori("Hiburan", "Rp 300.000", "Rp 280.000", "Rp 20.000", 0.93, merahAlert, Icons.face, false),
-            const SizedBox(height: 10),
-            _itemKategori("Pakaian", "Rp 400.000", "Rp 120.000", "Rp 280.000", 0.30, const Color(0xFF4CAF50), Icons.checkroom, true),
-
-            const SizedBox(height: 25),
+            _buildListKategori(),
+            
+            const SizedBox(height: 15),
             _header("Pengaturan", ""),
             const SizedBox(height: 15),
 
@@ -131,16 +171,48 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             ],
           ),
           const SizedBox(height: 15),
-          Text("Rp ${_budgetUtama.toInt()}", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: unguTua)),
-          const Text("Sisa: Rp 2.350.000", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          Text("Rp ${globalBudgetUtama.toInt()}", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: unguTua)),
+          Text("Sisa: Rp ${(globalBudgetUtama - _totalPakaiGlobal).toInt()}", style: TextStyle(color: globalBudgetUtama - _totalPakaiGlobal < 0 ? merahAlert : Colors.redAccent, fontWeight: FontWeight.bold)),
           const SizedBox(height: 15),
-          LinearProgressIndicator(value: 0.45, backgroundColor: Colors.white, valueColor: const AlwaysStoppedAnimation(Colors.white), minHeight: 8),
+          LinearProgressIndicator(value: (_totalPakaiGlobal / globalBudgetUtama).clamp(0.0, 1.0), backgroundColor: Colors.white, valueColor: const AlwaysStoppedAnimation(Colors.white), minHeight: 8),
         ],
       ),
     );
   }
 
-  Widget _itemKategori(String nama, String limit, String pakai, String sisa, double persen, Color warnaBar, IconData ikon, bool isGreen) {
+  String _formatRp(double value) {
+    return "Rp ${value.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
+  }
+
+  Widget _buildListKategori() {
+    return Column(
+      children: List.generate(_kategoriData.length, (index) {
+        var cat = _kategoriData[index];
+        double limit = cat['limit'];
+        double pakai = cat['pakai'];
+        double sisa = limit - pakai;
+        double persen = limit == 0 ? 0 : (pakai / limit).clamp(0.0, 1.0);
+        bool isGreen = sisa >= 0;
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _itemKategori(
+            cat['nama'],
+            _formatRp(limit),
+            _formatRp(pakai),
+            _formatRp(sisa),
+            persen,
+            cat['warnaBar'],
+            cat['ikon'],
+            isGreen,
+            index,
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _itemKategori(String nama, String limit, String pakai, String sisa, double persen, Color warnaBar, IconData ikon, bool isGreen, int index) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: warnaKartu, borderRadius: BorderRadius.circular(20)),
@@ -154,7 +226,10 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                 Text(nama, style: TextStyle(fontWeight: FontWeight.bold, color: unguTua)),
                 Text(limit, style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ])),
-              const Icon(Icons.more_vert, color: Colors.grey),
+              GestureDetector(
+                onTap: () => _showEditCategoryDialog(index),
+                child: const Icon(Icons.more_vert, color: Colors.grey),
+              ),
             ],
           ),
           const SizedBox(height: 15),
@@ -179,9 +254,9 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
       decoration: BoxDecoration(color: warnaKartu, borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
-          _tilePengaturan(Icons.notifications, "Notifikasi Budget", "Peringatan saat mendekati limit", _notif, (v) => setState(() => _notif = v)),
-          _tilePengaturan(Icons.warning_amber_rounded, "Peringatan 80%", "Alert saat budget mencapai 80%", _alert80, (v) => setState(() => _alert80 = v)),
-          _tilePengaturan(Icons.refresh, "Reset Otomatis", "Reset budget setiap awal bulan", _reset, (v) => setState(() => _reset = v)),
+          _tilePengaturan(Icons.notifications, "Notifikasi Budget", "Peringatan saat mendekati limit", globalNotif, (v) => setState(() => globalNotif = v)),
+          _tilePengaturan(Icons.warning_amber_rounded, "Peringatan 80%", "Alert saat budget mencapai 80%", globalAlert80, (v) => setState(() => globalAlert80 = v)),
+          _tilePengaturan(Icons.refresh, "Reset Otomatis", "Reset budget setiap awal bulan", globalReset, (v) => setState(() => globalReset = v)),
         ],
       ),
     );
