@@ -6,6 +6,7 @@ import '../widgets/action_buttons.dart';
 import '../widgets/expense_chart.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/recent_transactions.dart';
+import '../utils/no_animation_route.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart'; // Sudah ter-import
 import 'add_transaction_screen.dart';
@@ -76,7 +77,7 @@ class HomeScreen extends StatelessWidget {
           if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(
+              noAnimationRoute(
                 builder: (context) => const AddTransactionScreen(),
               ),
             );
@@ -84,7 +85,7 @@ class HomeScreen extends StatelessWidget {
             // Navigasi ke Riwayat Transaksi
             Navigator.push(
               context,
-              MaterialPageRoute(
+              noAnimationRoute(
                 builder: (context) => const TransactionHistoryScreen(),
               ),
             );
@@ -92,7 +93,7 @@ class HomeScreen extends StatelessWidget {
             // Navigasi ke Pengaturan Budget
             Navigator.push(
               context,
-              MaterialPageRoute(
+              noAnimationRoute(
                 builder: (context) => const BudgetSettingsScreen(),
               ),
             );

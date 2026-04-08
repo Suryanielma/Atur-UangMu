@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../utils/no_animation_route.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart';
 
@@ -476,12 +477,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const TransactionHistoryScreen()),
+              noAnimationRoute(
+                builder: (context) => const TransactionHistoryScreen(),
+              ),
             );
           } else if (index == 3) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const BudgetSettingsScreen()),
+              noAnimationRoute(
+                builder: (context) => const BudgetSettingsScreen(),
+              ),
             );
           }
         },
