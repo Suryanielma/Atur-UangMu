@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../utils/no_animation_route.dart';
+import '../widgets/category_dialogs.dart';
+import '../widgets/bank_dialog.dart';
+import '../widgets/ewallet_dialog.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart';
 
@@ -221,7 +224,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildCategoryItem(String title, IconData icon) {
     bool isSelected = selectedCategory == title;
     return GestureDetector(
-      onTap: () => setState(() => selectedCategory = title),
+      onTap: () {
+        setState(() => selectedCategory = title);
+        if (title == 'Lainnya') {
+          _showLainnyaDialog(context);
+        }
+      },
       child: Container(
         width: 70,
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -250,6 +258,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
+  void _showLainnyaDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CategoryDialog(
+          onCategorySelected: (String category) {
+            setState(() {
+              selectedCategory = category;
+            });
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildPaymentMethodSection() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -273,6 +296,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             Icons.account_balance,
             Colors.blue,
             hasArrow: true,
+            onTapOverride: () {
+              setState(() => selectedMethod = 'Bank');
+              _showBankDialog(context);
+            },
           ),
           const SizedBox(height: 12),
           _buildPaymentItem(
@@ -280,9 +307,43 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             Icons.account_balance_wallet,
             Colors.purple,
             hasArrow: true,
+            onTapOverride: () {
+              setState(() => selectedMethod = 'E-Wallet');
+              _showEWalletDialog(context);
+            },
           ),
         ],
       ),
+    );
+  }
+
+  void _showBankDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BankDialog(
+          onBankSelected: (String bank) {
+            setState(() {
+              selectedMethod = bank;
+            });
+          },
+        );
+      },
+    );
+  }
+
+  void _showEWalletDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EWalletDialog(
+          onEWalletSelected: (String ewallet) {
+            setState(() {
+              selectedMethod = ewallet;
+            });
+          },
+        );
+      },
     );
   }
 
@@ -291,10 +352,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     IconData icon,
     Color iconColor, {
     bool hasArrow = false,
+    VoidCallback? onTapOverride,
   }) {
-    bool isSelected = selectedMethod == title;
+    // Treat selectedMethod as selected if it matches title OR if title is 'Bank' and we have selected a bank
+    // OR if title is 'E-Wallet' and we have selected an E-Wallet
+    bool isSelected = selectedMethod == title || 
+                     (title == 'Bank' && ['BCA', 'BRI', 'Mandiri', 'BNI', 'BSI'].contains(selectedMethod)) ||
+                     (title == 'E-Wallet' && ['GoPay', 'OVO', 'DANA', 'ShopeePay'].contains(selectedMethod));
+                     
+    String displayTitle = title;
+    if (title == 'Bank' && isSelected && selectedMethod != 'Bank') {
+      displayTitle = selectedMethod;
+    } else if (title == 'E-Wallet' && isSelected && selectedMethod != 'E-Wallet') {
+      displayTitle = selectedMethod;
+    }
+
     return GestureDetector(
-      onTap: () => setState(() => selectedMethod = title),
+      onTap: onTapOverride ?? () => setState(() => selectedMethod = title),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
@@ -315,7 +389,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                title,
+                displayTitle,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 16,
