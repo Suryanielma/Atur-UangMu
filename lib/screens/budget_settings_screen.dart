@@ -8,7 +8,7 @@ class BudgetSettingsScreen extends StatefulWidget {
 }
 
 class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
-  final Color warnaBackground = const Color(0xFFF8D7EA); // Pink cerah background
+  final Color warnaBackground = const Color.fromARGB(255, 246, 171, 219);
   final Color warnaKartu = const Color(0xFFFCEEF6); // Pink sangat muda untuk kartu
   final Color unguTua = const Color(0xFF402273); // Warna judul & teks utama
   final Color pinkAksen = const Color(0xFFFE5897); // Warna tombol & switch
