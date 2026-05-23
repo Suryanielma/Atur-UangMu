@@ -1,3 +1,8 @@
+//data dummy
+
+import 'package:flutter/material.dart';
+
+
 class DefaultData {
   static const String userDisplayName = 'Pengguna';
   static const String budgetWarningMessage =

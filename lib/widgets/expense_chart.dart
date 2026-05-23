@@ -1,3 +1,6 @@
+// Widget untuk menampilkan grafik pengeluaran mingguan di halaman dashboard. 
+//Grafik ini akan menampilkan total pengeluaran untuk setiap hari dalam seminggu, sehingga pengguna dapat dengan mudah melihat pola pengeluaran mereka.
+
 import 'package:flutter/material.dart';
 import '../data/in_memory_data_store.dart';
 import '../services/dashboard_service.dart';

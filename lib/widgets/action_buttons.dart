@@ -1,3 +1,5 @@
+// Widget untuk tombol aksi utama di halaman dashboard, seperti "Catat Transaksi" dan "Atur Budget".
+
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../screens/add_transaction_screen.dart';

@@ -1,3 +1,6 @@
+// Widget untuk menampilkan saldo total, pemasukan, dan pengeluaran di halaman dashboard. 
+// menyediakan fitur untuk menyembunyikan atau menampilkan saldo sesuai keinginan pengguna.
+
 import 'package:flutter/material.dart';
 import '../data/in_memory_data_store.dart';
 import '../services/dashboard_service.dart';

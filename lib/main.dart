@@ -1,3 +1,5 @@
+// File utama aplikasi yang menjalankan widget MyApp, yang merupakan titik masuk dari aplikasi
+
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
