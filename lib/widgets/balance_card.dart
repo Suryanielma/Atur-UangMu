@@ -125,12 +125,11 @@ class _BalanceCardState extends State<BalanceCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${amount.split(' ')[0]}\n${amount.substring(amount.indexOf(' ') + 1)}',
+            amount,
             style: TextStyle(
               color: textColor,
               fontWeight: FontWeight.bold,
               fontSize: 16,
-              height: 1.2,
             ),
           ),
         ],
