@@ -54,9 +54,21 @@ class TransactionService {
                   normalizedValue.contains(category);
               break;
             case 'pembayaran':
-              matchesFilter =
-                  normalizedValue.isEmpty ||
-                  paymentMethod == normalizedValue;
+              if (normalizedValue.isEmpty) {
+                matchesFilter = true;
+              } else if (normalizedValue == 'cash') {
+                matchesFilter = paymentMethod == 'cash';
+              } else if (normalizedValue == 'bank') {
+                matchesFilter = _store.bankOptions
+                    .map((e) => e.toLowerCase())
+                    .contains(paymentMethod);
+              } else if (normalizedValue == 'e-wallet') {
+                matchesFilter = _store.eWalletOptions
+                    .map((e) => e.toLowerCase())
+                    .contains(paymentMethod);
+              } else {
+                matchesFilter = paymentMethod == normalizedValue;
+              }
               break;
           }
 
@@ -67,18 +79,15 @@ class TransactionService {
 
   List<String> getAvailableCategories() {
     final categories = <String>{};
-    for (final tx in _store.historyTransactions) {
-      categories.add(tx.category);
+    categories.addAll(_store.incomeCategories);
+    for (final c in _store.budgetCategories) {
+      categories.add(c.name);
     }
     return categories.toList()..sort();
   }
 
   List<String> getAvailablePaymentMethods() {
-    final methods = <String>{};
-    for (final tx in _store.historyTransactions) {
-      methods.add(tx.paymentMethod);
-    }
-    return methods.toList()..sort();
+    return ['Cash', 'Bank', 'E-Wallet'];
   }
 
   bool _isInMonth(TransactionModel tx, String monthKey) {
