@@ -4,6 +4,7 @@ import '../models/transaction_model.dart';
 import '../services/transaction_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_formatters.dart';
+import '../screens/transaction_history_screen.dart';
 
 class RecentTransactions extends StatelessWidget {
   const RecentTransactions({super.key});
@@ -25,10 +26,10 @@ class RecentTransactions extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Transaksi Terakhir',
                     style: TextStyle(
                       color: AppColors.textPrimary,
@@ -36,9 +37,19 @@ class RecentTransactions extends StatelessWidget {
                       fontSize: 18,
                     ),
                   ),
-                  Text(
-                    'Lihat Semua',
-                    style: TextStyle(color: AppColors.expenseRed, fontSize: 14),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TransactionHistoryScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Lihat Semua',
+                      style: TextStyle(color: AppColors.expenseRed, fontSize: 14),
+                    ),
                   ),
                 ],
               ),

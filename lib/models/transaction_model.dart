@@ -13,6 +13,7 @@ class TransactionModel {
     required this.iconColor,
     required this.paymentMethod,
     required this.note,
+    this.createdAt,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class TransactionModel {
   final Color iconColor;
   final String paymentMethod;
   final String note;
+  final DateTime? createdAt;
 
   bool get isIncome => amount > 0;
 
@@ -41,6 +43,7 @@ class TransactionModel {
     Color? iconColor,
     String? paymentMethod,
     String? note,
+    DateTime? createdAt,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -54,6 +57,7 @@ class TransactionModel {
       iconColor: iconColor ?? this.iconColor,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -70,6 +74,7 @@ class TransactionModel {
       iconColor: seed['iconColor'] as Color,
       paymentMethod: seed['paymentMethod'] as String,
       note: seed['note'] as String,
+      createdAt: seed['createdAt'] as DateTime?,
     );
   }
 }

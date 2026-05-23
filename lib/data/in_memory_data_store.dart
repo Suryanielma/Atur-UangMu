@@ -52,7 +52,11 @@ class InMemoryDataStore extends ChangeNotifier {
   UnmodifiableListView<String> get weeklyExpenseDays =>
       UnmodifiableListView(_weeklyExpenseDays);
 
-  double get weeklyExpenseMax => DefaultData.weeklyExpenseMax;
+  double get weeklyExpenseMax {
+    if (_weeklyExpenseValues.isEmpty) return 1.0;
+    double maxVal = _weeklyExpenseValues.reduce((curr, next) => curr > next ? curr : next);
+    return maxVal < 1.0 ? 1000.0 : maxVal;
+  }
 
   UnmodifiableListView<String> get incomeCategories =>
       UnmodifiableListView(_incomeCategories);
@@ -86,6 +90,8 @@ class InMemoryDataStore extends ChangeNotifier {
       );
       _increaseCategoryUsage(transaction.category, expenseValue);
       _increaseHomeBudgetBreakdown(transaction.category, expenseValue);
+      
+      _updateWeeklyExpenses();
     }
 
     notifyListeners();
@@ -203,12 +209,61 @@ class InMemoryDataStore extends ChangeNotifier {
         .map(TransactionModel.fromSeed)
         .toList(growable: true);
 
-    _weeklyExpenseValues = List<double>.from(DefaultData.weeklyExpenseValues);
-    _weeklyExpenseDays = List<String>.from(DefaultData.weeklyExpenseDays);
     _incomeCategories = List<String>.from(DefaultData.incomeCategories);
     _expenseCategories = List<String>.from(DefaultData.expenseCategories);
     _bankOptions = List<String>.from(DefaultData.bankOptions);
     _eWalletOptions = List<String>.from(DefaultData.eWalletOptions);
+
+    _updateWeeklyExpenses();
+  }
+
+  void _updateWeeklyExpenses() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Create an array of 7 days backward
+    final List<double> values = List.filled(7, 0.0);
+    final List<String> days = List.filled(7, '');
+    
+    final dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+    for (int i = 0; i < 7; i++) {
+        final d = today.subtract(Duration(days: 6 - i));
+        days[i] = dayNames[d.weekday % 7];
+    }
+
+    for (final tx in _historyTransactions) {
+      if (tx.isIncome) continue;
+      
+      DateTime rxDate;
+      if (tx.createdAt != null) {
+        rxDate = tx.createdAt!;
+      } else {
+        // Fallback for mocked data based on groupLabel
+        if (tx.groupLabel == 'Hari Ini') {
+          rxDate = today;
+        } else if (tx.groupLabel == 'Kemarin') {
+          rxDate = today.subtract(const Duration(days: 1));
+        } else if (tx.groupLabel == 'Minggu Ini') {
+          // just mock it as 2 days ago to show some distribution
+          rxDate = today.subtract(const Duration(days: 2));
+        } else {
+          continue; // outside 7 days for mocked data
+        }
+      }
+
+      final dateOnly = DateTime(rxDate.year, rxDate.month, rxDate.day);
+      final difference = today.difference(dateOnly).inDays;
+      
+      if (difference >= 0 && difference < 7) {
+        // map backward difference into forward index [0..6]
+        final index = 6 - difference;
+        values[index] += tx.amount.abs().toDouble(); // accumulation
+      }
+    }
+
+    _weeklyExpenseValues = values;
+    _weeklyExpenseDays = days;
   }
 
   void _increaseCategoryUsage(String category, int expenseValue) {

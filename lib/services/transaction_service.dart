@@ -91,6 +91,7 @@ class TransactionService {
       iconColor: isIncome ? const Color(0xFF07A16B) : const Color(0xFFE43E3C),
       paymentMethod: paymentMethod,
       note: note,
+      createdAt: transactionDate,
     );
 
     _store.addTransaction(transaction);
