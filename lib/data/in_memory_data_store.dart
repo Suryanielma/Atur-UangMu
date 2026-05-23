@@ -112,6 +112,23 @@ class InMemoryDataStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addBudgetCategory(BudgetCategoryModel category) {
+    final trimmedName = category.name.trim();
+    if (trimmedName.isEmpty) {
+      return;
+    }
+
+    final exists = _budgetCategories.any(
+      (item) => item.name.toLowerCase() == trimmedName.toLowerCase(),
+    );
+    if (exists) {
+      return;
+    }
+
+    _budgetCategories = [..._budgetCategories, category];
+    notifyListeners();
+  }
+
   void updateMonthlyBudget(int newMonthlyBudget) {
     _budgetSettings = _budgetSettings.copyWith(monthlyBudget: newMonthlyBudget);
     notifyListeners();

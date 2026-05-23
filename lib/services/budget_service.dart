@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../data/in_memory_data_store.dart';
 import '../models/budget_category_model.dart';
 import '../models/budget_overview_model.dart';
@@ -38,6 +40,38 @@ class BudgetService {
       return;
     }
     _store.updateBudgetCategoryLimit(index: index, newLimitAmount: amount);
+  }
+
+  bool addBudgetCategory({
+    required String name,
+    required int limitAmount,
+  }) {
+    if (limitAmount <= 0) {
+      return false;
+    }
+
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      return false;
+    }
+
+    final exists = _store.budgetCategories.any(
+      (item) => item.name.toLowerCase() == trimmedName.toLowerCase(),
+    );
+    if (exists) {
+      return false;
+    }
+
+    _store.addBudgetCategory(
+      BudgetCategoryModel(
+        name: trimmedName,
+        limitAmount: limitAmount,
+        usedAmount: 0,
+        progressColor: const Color(0xFF9C27B0),
+        icon: Icons.category,
+      ),
+    );
+    return true;
   }
 
   void setNotifications(bool value) {

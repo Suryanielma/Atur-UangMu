@@ -62,19 +62,42 @@ class TransactionModel {
   }
 
   factory TransactionModel.fromSeed(Map<String, dynamic> seed) {
+    final groupLabel = seed['groupLabel'] as String;
+
     return TransactionModel(
       id: seed['id'] as String,
       title: seed['title'] as String,
       category: seed['category'] as String,
       timeLabel: seed['timeLabel'] as String,
       amount: seed['amount'] as int,
-      groupLabel: seed['groupLabel'] as String,
+      groupLabel: groupLabel,
       icon: seed['icon'] as IconData,
       iconBg: seed['iconBg'] as Color,
       iconColor: seed['iconColor'] as Color,
       paymentMethod: seed['paymentMethod'] as String,
       note: seed['note'] as String,
-      createdAt: seed['createdAt'] as DateTime?,
+      createdAt:
+          seed['createdAt'] as DateTime? ??
+          inferDateFromGroupLabel(groupLabel),
     );
+  }
+
+  static DateTime inferDateFromGroupLabel(String groupLabel) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    switch (groupLabel) {
+      case 'Hari Ini':
+        return today;
+      case 'Kemarin':
+        return today.subtract(const Duration(days: 1));
+      case 'Minggu Ini':
+        return today.subtract(const Duration(days: 4));
+      case 'Bulan Lalu':
+        final previousMonth = DateTime(now.year, now.month - 1, 15);
+        return previousMonth;
+      default:
+        return today;
+    }
   }
 }

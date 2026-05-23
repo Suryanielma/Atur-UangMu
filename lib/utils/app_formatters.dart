@@ -76,3 +76,42 @@ String formatDateInput(DateTime date) {
   final month = date.month.toString().padLeft(2, '0');
   return '$day/$month/${date.year}';
 }
+
+const _monthNamesFull = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+];
+
+String formatMonthYear(DateTime date) {
+  return '${_monthNamesFull[date.month - 1]} ${date.year}';
+}
+
+String formatMonthYearKey(DateTime date) {
+  final month = date.month.toString().padLeft(2, '0');
+  return '${date.year}-$month';
+}
+
+DateTime? parseMonthYearKey(String value) {
+  final parts = value.split('-');
+  if (parts.length != 2) {
+    return null;
+  }
+
+  final year = int.tryParse(parts[0]);
+  final month = int.tryParse(parts[1]);
+  if (year == null || month == null || month < 1 || month > 12) {
+    return null;
+  }
+
+  return DateTime(year, month);
+}

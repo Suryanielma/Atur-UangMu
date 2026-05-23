@@ -23,7 +23,17 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   final DashboardService _dashboardService = DashboardService.instance;
 
   String searchQuery = '';
-  String activeFilter = '';
+  String filterType = 'bulan';
+  String filterValue = '';
+  late DateTime selectedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    selectedMonth = DateTime(now.year, now.month);
+    filterValue = formatMonthYearKey(selectedMonth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +42,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       builder: (context, _) {
         final filteredTransactions = _transactionService.filterTransactions(
           searchQuery: searchQuery,
-          activeFilter: activeFilter,
+          filterType: filterType,
+          filterValue: filterValue,
         );
         final groupedData = _transactionService.groupByLabel(
           filteredTransactions,
@@ -146,14 +157,21 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
+                              _buildMonthFilterChip(),
+                              const SizedBox(width: 8),
                               _buildFilterChip(
-                                'Bulan Ini',
-                                Icons.calendar_today,
+                                'Kategori',
+                                Icons.filter_alt,
+                                filterKey: 'kategori',
+                                onTap: _showCategoryFilter,
                               ),
                               const SizedBox(width: 8),
-                              _buildFilterChip('Kategori', Icons.filter_alt),
-                              const SizedBox(width: 8),
-                              _buildFilterChip('Pembayaran', Icons.credit_card),
+                              _buildFilterChip(
+                                'Pembayaran',
+                                Icons.credit_card,
+                                filterKey: 'pembayaran',
+                                onTap: _showPaymentFilter,
+                              ),
                             ],
                           ),
                         ),
@@ -286,12 +304,264 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, IconData icon) {
-    bool isActive = activeFilter == label;
+  void _showScrollableFilterSheet({
+    required String title,
+    required List<Widget> children,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.cardBackgroundPurple,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.55;
+
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: children,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showMonthPicker() {
+    final now = DateTime.now();
+    final months = List<DateTime>.generate(24, (index) {
+      final date = DateTime(now.year, now.month - index);
+      return DateTime(date.year, date.month);
+    });
+
+    _showScrollableFilterSheet(
+      title: 'Pilih Periode',
+      children: [
+        ListTile(
+          title: const Text(
+            'Semua Periode',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+          onTap: () {
+            setState(() {
+              filterType = '';
+              filterValue = '';
+            });
+            Navigator.pop(context);
+          },
+        ),
+        ...months.map((month) {
+          final monthKey = formatMonthYearKey(month);
+          final isSelected =
+              filterType == 'bulan' && filterValue == monthKey;
+
+          return ListTile(
+            title: Text(
+              formatMonthYear(month),
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+            trailing: isSelected
+                ? const Icon(Icons.check, color: AppColors.textPrimary)
+                : null,
+            onTap: () {
+              setState(() {
+                selectedMonth = month;
+                filterType = 'bulan';
+                filterValue = monthKey;
+              });
+              Navigator.pop(context);
+            },
+          );
+        }),
+      ],
+    );
+  }
+
+  void _showCategoryFilter() {
+    final categories = _transactionService.getAvailableCategories();
+
+    _showScrollableFilterSheet(
+      title: 'Pilih Kategori',
+      children: [
+        ...categories.map(
+          (category) => ListTile(
+            title: Text(
+              category,
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+            trailing: filterType == 'kategori' && filterValue == category
+                ? const Icon(Icons.check, color: AppColors.textPrimary)
+                : null,
+            onTap: () {
+              setState(() {
+                filterType = 'kategori';
+                filterValue = category;
+              });
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text(
+            'Semua Kategori',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+          onTap: () {
+            setState(() {
+              if (filterType == 'kategori') {
+                filterType = 'bulan';
+                filterValue = formatMonthYearKey(selectedMonth);
+              } else {
+                filterType = '';
+                filterValue = '';
+              }
+            });
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showPaymentFilter() {
+    final methods = _transactionService.getAvailablePaymentMethods();
+
+    _showScrollableFilterSheet(
+      title: 'Pilih Metode Pembayaran',
+      children: [
+        ...methods.map(
+          (method) => ListTile(
+            title: Text(
+              method,
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+            trailing: filterType == 'pembayaran' && filterValue == method
+                ? const Icon(Icons.check, color: AppColors.textPrimary)
+                : null,
+            onTap: () {
+              setState(() {
+                filterType = 'pembayaran';
+                filterValue = method;
+              });
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        ListTile(
+          title: const Text(
+            'Semua Metode',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+          onTap: () {
+            setState(() {
+              if (filterType == 'pembayaran') {
+                filterType = 'bulan';
+                filterValue = formatMonthYearKey(selectedMonth);
+              } else {
+                filterType = '';
+                filterValue = '';
+              }
+            });
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthFilterChip() {
+    final isActive = filterType == 'bulan';
+    final label = isActive
+        ? formatMonthYear(selectedMonth)
+        : 'Pilih Periode';
+
+    return GestureDetector(
+      onTap: _showMonthPicker,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.textPrimary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: isActive
+              ? null
+              : Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_today,
+              size: 16,
+              color: isActive ? Colors.white : AppColors.textPrimary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 18,
+              color: isActive ? Colors.white : AppColors.textPrimary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+    String label,
+    IconData icon, {
+    required String filterKey,
+    VoidCallback? onTap,
+  }) {
+    final isActive = filterType == filterKey;
+    final displayLabel =
+        isActive && filterValue.isNotEmpty ? filterValue : label;
+
     return GestureDetector(
       onTap: () {
+        if (onTap != null) {
+          onTap();
+          return;
+        }
+
         setState(() {
-          activeFilter = isActive ? '' : label; // toggle filter
+          if (isActive) {
+            filterType = '';
+            filterValue = '';
+          } else {
+            filterType = filterKey;
+            filterValue = '';
+          }
         });
       },
       child: Container(
@@ -309,7 +579,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              label,
+              displayLabel,
               style: TextStyle(
                 color: isActive ? Colors.white : AppColors.textPrimary,
                 fontWeight: FontWeight.w600,

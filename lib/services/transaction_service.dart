@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/in_memory_data_store.dart';
 import '../models/transaction_model.dart';
-import '../utils/app_formatters.dart';
+import '../utils/app_formatters.dart' show formatDateLabel, parseMonthYearKey;
 
 class TransactionService {
   TransactionService._internal();
@@ -21,30 +21,75 @@ class TransactionService {
 
   List<TransactionModel> filterTransactions({
     required String searchQuery,
-    required String activeFilter,
+    required String filterType,
+    String filterValue = '',
   }) {
     final normalizedQuery = searchQuery.toLowerCase().trim();
-    final normalizedFilter = activeFilter.toLowerCase().trim();
+    final normalizedValue = filterValue.toLowerCase().trim();
 
     return _store.historyTransactions
         .where((tx) {
           final title = tx.title.toLowerCase();
           final category = tx.category.toLowerCase();
-          final groupLabel = tx.groupLabel.toLowerCase();
+          final paymentMethod = tx.paymentMethod.toLowerCase();
 
           final matchesQuery =
               normalizedQuery.isEmpty ||
               title.contains(normalizedQuery) ||
               category.contains(normalizedQuery);
 
-          final matchesFilter =
-              normalizedFilter.isEmpty ||
-              groupLabel == normalizedFilter ||
-              category == normalizedFilter;
+          if (filterType.isEmpty) {
+            return matchesQuery;
+          }
+
+          bool matchesFilter = false;
+          switch (filterType) {
+            case 'bulan':
+              matchesFilter = _isInMonth(tx, normalizedValue);
+              break;
+            case 'kategori':
+              matchesFilter =
+                  normalizedValue.isEmpty ||
+                  category.contains(normalizedValue) ||
+                  normalizedValue.contains(category);
+              break;
+            case 'pembayaran':
+              matchesFilter =
+                  normalizedValue.isEmpty ||
+                  paymentMethod == normalizedValue;
+              break;
+          }
 
           return matchesQuery && matchesFilter;
         })
         .toList(growable: false);
+  }
+
+  List<String> getAvailableCategories() {
+    final categories = <String>{};
+    for (final tx in _store.historyTransactions) {
+      categories.add(tx.category);
+    }
+    return categories.toList()..sort();
+  }
+
+  List<String> getAvailablePaymentMethods() {
+    final methods = <String>{};
+    for (final tx in _store.historyTransactions) {
+      methods.add(tx.paymentMethod);
+    }
+    return methods.toList()..sort();
+  }
+
+  bool _isInMonth(TransactionModel tx, String monthKey) {
+    final selected = parseMonthYearKey(monthKey);
+    if (selected == null) {
+      return true;
+    }
+
+    final date =
+        tx.createdAt ?? TransactionModel.inferDateFromGroupLabel(tx.groupLabel);
+    return date.year == selected.year && date.month == selected.month;
   }
 
   Map<String, List<TransactionModel>> groupByLabel(

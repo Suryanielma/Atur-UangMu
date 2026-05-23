@@ -74,6 +74,78 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     );
   }
 
+  void _showAddCategoryDialog() {
+    final nameController = TextEditingController();
+    final limitController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Tambah Kategori Budget',
+          style: TextStyle(color: unguTua, fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nama Kategori',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: limitController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Limit Budget',
+                prefixText: 'Rp ',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              final limit = int.tryParse(limitController.text) ?? 0;
+
+              if (name.isEmpty || limit <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Nama dan limit budget harus diisi'),
+                  ),
+                );
+                return;
+              }
+
+              final added = _budgetService.addBudgetCategory(
+                name: name,
+                limitAmount: limit,
+              );
+              if (!added) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Kategori sudah ada atau tidak valid'),
+                  ),
+                );
+                return;
+              }
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
+            child: const Text('Tambah', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showEditDialog() {
     final settings = _budgetService.getBudgetSettings();
     final controller = TextEditingController(
@@ -143,7 +215,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
               children: [
                 _cardUtama(settings, totalPakaiGlobal),
                 const SizedBox(height: 25),
-                _header('Budget per Kategori', '+ Tambah'),
+                _header('Budget per Kategori', '+ Tambah', onActionTap: _showAddCategoryDialog),
                 const SizedBox(height: 15),
                 _buildListKategori(categories),
                 const SizedBox(height: 15),
@@ -424,7 +496,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     );
   }
 
-  Widget _header(String t, String a) {
+  Widget _header(String t, String a, {VoidCallback? onActionTap}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -436,14 +508,18 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             fontSize: 16,
           ),
         ),
-        Text(
-          a,
-          style: TextStyle(
-            color: pinkAksen,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+        if (a.isNotEmpty)
+          GestureDetector(
+            onTap: onActionTap,
+            child: Text(
+              a,
+              style: TextStyle(
+                color: pinkAksen,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
