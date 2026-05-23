@@ -36,6 +36,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     selectedCategory = incomeCategories.isNotEmpty
         ? incomeCategories.first
         : 'Lainnya';
+    selectedDate = DateTime.now();
+    _dateController.text = formatDateInput(selectedDate!);
   }
 
   @override
@@ -507,16 +509,24 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Future<void> _selectDate() async {
+    final now = DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: selectedDate ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        selectedDate = picked;
-        _dateController.text = formatDateInput(picked);
+        selectedDate = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          now.hour,
+          now.minute,
+          now.second,
+        );
+        _dateController.text = formatDateInput(selectedDate!);
       });
     }
   }
@@ -625,12 +635,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
 
+    final now = DateTime.now();
+    final dateToUse = selectedDate ?? now;
+    
+    // Pastikan waktunya menggunakan waktu saat tombol simpan ditekan
+    final finalDate = DateTime(
+      dateToUse.year,
+      dateToUse.month,
+      dateToUse.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
+
     _transactionService.addTransaction(
       isIncome: isIncome,
       amount: amount,
       category: selectedCategory,
       paymentMethod: selectedMethod,
-      transactionDate: selectedDate ?? DateTime.now(),
+      transactionDate: finalDate,
       note: _notesController.text.trim(),
     );
 
