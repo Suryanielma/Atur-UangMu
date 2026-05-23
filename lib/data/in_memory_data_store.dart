@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../constants/default_data.dart';
 import '../models/budget_category_model.dart';
@@ -33,7 +34,12 @@ class InMemoryDataStore extends ChangeNotifier {
 
   DashboardSummaryModel get homeSummary => _homeSummary;
   DashboardSummaryModel get historySummary => _historySummary;
-  BudgetOverviewModel get homeBudgetOverview => _homeBudgetOverview;
+  BudgetOverviewModel get homeBudgetOverview {
+    final breakdown = _budgetCategories
+        .map((c) => BudgetBreakdownModel(name: c.name, amount: c.usedAmount))
+        .toList(growable: false);
+    return _homeBudgetOverview.copyWith(breakdown: breakdown);
+  }
   BudgetSettingsModel get budgetSettings => _budgetSettings;
   int get budgetSettingsTotalUsed => _budgetSettingsTotalUsed;
 
@@ -89,7 +95,6 @@ class InMemoryDataStore extends ChangeNotifier {
         usedAmount: _homeBudgetOverview.usedAmount + expenseValue,
       );
       _increaseCategoryUsage(transaction.category, expenseValue);
-      _increaseHomeBudgetBreakdown(transaction.category, expenseValue);
       
       _updateWeeklyExpenses();
     }
@@ -100,6 +105,8 @@ class InMemoryDataStore extends ChangeNotifier {
   void updateBudgetCategoryLimit({
     required int index,
     required int newLimitAmount,
+    String? newName,
+    IconData? newIcon,
   }) {
     if (index < 0 || index >= _budgetCategories.length) {
       return;
@@ -107,9 +114,18 @@ class InMemoryDataStore extends ChangeNotifier {
 
     final updatedCategory = _budgetCategories[index].copyWith(
       limitAmount: newLimitAmount,
+      name: newName,
+      icon: newIcon,
     );
     _budgetCategories[index] = updatedCategory;
     notifyListeners();
+  }
+
+  void deleteBudgetCategory(int index) {
+    if (index >= 0 && index < _budgetCategories.length) {
+      _budgetCategories.removeAt(index);
+      notifyListeners();
+    }
   }
 
   void addBudgetCategory(BudgetCategoryModel category) {
@@ -131,6 +147,7 @@ class InMemoryDataStore extends ChangeNotifier {
 
   void updateMonthlyBudget(int newMonthlyBudget) {
     _budgetSettings = _budgetSettings.copyWith(monthlyBudget: newMonthlyBudget);
+    _homeBudgetOverview = _homeBudgetOverview.copyWith(limitAmount: newMonthlyBudget);
     notifyListeners();
   }
 
@@ -299,23 +316,6 @@ class InMemoryDataStore extends ChangeNotifier {
       usedAmount: existing.usedAmount + expenseValue,
     );
   }
-
-  void _increaseHomeBudgetBreakdown(String category, int expenseValue) {
-    final source = category.toLowerCase();
-
-    final updatedBreakdown = _homeBudgetOverview.breakdown
-        .map((item) {
-          final name = item.name.toLowerCase();
-          if (!source.contains(name) && !name.contains(source)) {
-            return item;
-          }
-
-          return item.copyWith(amount: item.amount + expenseValue);
-        })
-        .toList(growable: false);
-
-    _homeBudgetOverview = _homeBudgetOverview.copyWith(
-      breakdown: updatedBreakdown,
-    );
-  }
 }
+
+

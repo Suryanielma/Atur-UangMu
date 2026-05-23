@@ -74,18 +74,6 @@ class BudgetCard extends StatelessWidget {
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(4),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: overview.breakdown
-                    .map(
-                      (item) => _buildCategory(
-                        item.name,
-                        formatCompactRupiah(item.amount),
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
             ],
           ),
         );

@@ -35,18 +35,23 @@ class BudgetService {
     _store.updateMonthlyBudget(amount);
   }
 
-  void updateCategoryLimit({required int index, required int amount}) {
-    if (amount <= 0) {
+  void updateCategoryLimit({required int index, required int amount, String? name, IconData? icon}) {
+    if (amount < 0) {
       return;
     }
-    _store.updateBudgetCategoryLimit(index: index, newLimitAmount: amount);
+    _store.updateBudgetCategoryLimit(index: index, newLimitAmount: amount, newName: name, newIcon: icon);
+  }
+
+  void deleteBudgetCategory(int index) {
+    _store.deleteBudgetCategory(index);
   }
 
   bool addBudgetCategory({
     required String name,
     required int limitAmount,
+    IconData icon = Icons.category,
   }) {
-    if (limitAmount <= 0) {
+    if (limitAmount < 0) {
       return false;
     }
 
@@ -68,7 +73,7 @@ class BudgetService {
         limitAmount: limitAmount,
         usedAmount: 0,
         progressColor: const Color(0xFF9C27B0),
-        icon: Icons.category,
+        icon: icon,
       ),
     );
     return true;

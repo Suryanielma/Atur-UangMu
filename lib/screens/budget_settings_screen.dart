@@ -28,6 +28,20 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
   final Color hijauSisa = const Color(0xFF34A853);
   final Color merahAlert = const Color(0xFFFF5252);
 
+  bool _canAddOrUpdateCategoryLimit(int limitAmount, {int ignoreIndex = -1}) {
+    final settings = _budgetService.getBudgetSettings();
+    final categories = _budgetService.getBudgetCategories();
+    
+    int totalAllocated = 0;
+    for (int i = 0; i < categories.length; i++) {
+      if (i != ignoreIndex) {
+        totalAllocated += categories[i].limitAmount;
+      }
+    }
+    
+    return (totalAllocated + limitAmount) <= settings.monthlyBudget;
+  }
+
   void _showEditCategoryDialog(int index) {
     final categories = _budgetService.getBudgetCategories();
     if (index < 0 || index >= categories.length) {
@@ -35,113 +49,60 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     }
 
     final category = categories[index];
-    final controller = TextEditingController(
-      text: category.limitAmount.toString(),
-    );
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Edit Budget ${category.name}',
-          style: TextStyle(color: unguTua, fontWeight: FontWeight.bold),
-        ),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(prefixText: 'Rp '),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newLimit =
-                  int.tryParse(controller.text) ?? category.limitAmount;
-              _budgetService.updateCategoryLimit(
-                index: index,
-                amount: newLimit,
-              );
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
-            child: const Text('Simpan', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+      builder: (context) => BudgetCategoryDialogWidget(
+        initialCategory: category,
+        onSave: (name, limit, icon) {
+          if (!_canAddOrUpdateCategoryLimit(limit, ignoreIndex: index)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Gagal: Total kategori melebihi budget bulanan!'),
+              ),
+            );
+            return;
+          }
+          _budgetService.updateCategoryLimit(
+            index: index,
+            amount: limit,
+            name: name,
+            icon: icon,
+          );
+          Navigator.pop(context);
+        },
       ),
     );
   }
 
   void _showAddCategoryDialog() {
-    final nameController = TextEditingController();
-    final limitController = TextEditingController();
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Tambah Kategori Budget',
-          style: TextStyle(color: unguTua, fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Kategori',
+      builder: (context) => BudgetCategoryDialogWidget(
+        onSave: (name, limit, icon) {
+          if (!_canAddOrUpdateCategoryLimit(limit)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Gagal: Total kategori melebihi budget bulanan!'),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: limitController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Limit Budget',
-                prefixText: 'Rp ',
+            );
+            return;
+          }
+          final added = _budgetService.addBudgetCategory(
+            name: name,
+            limitAmount: limit,
+            icon: icon,
+          );
+          if (!added) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Kategori sudah ada atau tidak valid'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              final limit = int.tryParse(limitController.text) ?? 0;
-
-              if (name.isEmpty || limit <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nama dan limit budget harus diisi'),
-                  ),
-                );
-                return;
-              }
-
-              final added = _budgetService.addBudgetCategory(
-                name: name,
-                limitAmount: limit,
-              );
-              if (!added) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Kategori sudah ada atau tidak valid'),
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
-            child: const Text('Tambah', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+            );
+          } else {
+            Navigator.pop(context);
+          }
+        },
       ),
     );
   }
@@ -287,17 +248,17 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           ),
           const SizedBox(height: 15),
           Text(
-            formatRupiah(settings.monthlyBudget),
+            'Sisa: ${formatRupiah(remaining)}',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: unguTua,
+              color: remaining < 0 ? merahAlert : unguTua,
             ),
           ),
           Text(
-            'Sisa: ${formatRupiah(remaining)}',
-            style: TextStyle(
-              color: remaining < 0 ? merahAlert : Colors.redAccent,
+            'Total Budget: ${formatRupiah(settings.monthlyBudget)}',
+            style: const TextStyle(
+              color: Colors.grey,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -361,9 +322,25 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => _showEditCategoryDialog(index),
-                child: const Icon(Icons.more_vert, color: Colors.grey),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: Colors.grey),
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _showEditCategoryDialog(index);
+                  } else if (value == 'hapus') {
+                    _budgetService.deleteBudgetCategory(index);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Text('Edit'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'hapus',
+                    child: Text('Hapus'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -568,6 +545,175 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             label: 'Budget',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class BudgetCategoryDialogWidget extends StatefulWidget {
+  final BudgetCategoryModel? initialCategory;
+  final Function(String name, int limit, IconData icon) onSave;
+
+  const BudgetCategoryDialogWidget({
+    super.key,
+    this.initialCategory,
+    required this.onSave,
+  });
+
+  @override
+  State<BudgetCategoryDialogWidget> createState() => _BudgetCategoryDialogWidgetState();
+}
+
+class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget> {
+  late TextEditingController _nameController;
+  late TextEditingController _limitController;
+  late IconData _selectedIcon;
+
+  final List<IconData> _iconOptions = [
+    Icons.fastfood,
+    Icons.shopping_bag,
+    Icons.directions_car,
+    Icons.home,
+    Icons.medical_services,
+    Icons.school,
+    Icons.pets,
+    Icons.sports_esports,
+    Icons.movie,
+    Icons.flight,
+    Icons.weekend,
+    Icons.computer,
+    Icons.bolt,
+    Icons.water_drop,
+    Icons.smartphone,
+    Icons.family_restroom,
+    Icons.card_giftcard,
+    Icons.category,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialCategory?.name ?? '');
+    _limitController = TextEditingController(
+      text: widget.initialCategory != null ? widget.initialCategory!.limitAmount.toString() : '',
+    );
+    _selectedIcon = widget.initialCategory?.icon ?? Icons.category;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _limitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.initialCategory == null ? 'Tambah Kategori' : 'Edit Kategori';
+    final Color unguTua = const Color(0xFF402273);
+    final Color pinkAksen = const Color(0xFFFE5897);
+
+    return Dialog(
+      backgroundColor: const Color(0xFFFCEEF6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(color: unguTua, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              const Text('Pilih Ikon', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                  ),
+                  itemCount: _iconOptions.length,
+                  itemBuilder: (context, index) {
+                    final icon = _iconOptions[index];
+                    final isSelected = _selectedIcon == icon;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedIcon = icon),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? pinkAksen : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: isSelected ? Colors.white : Colors.grey[700],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Kategori',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _limitController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Limit Budget',
+                  prefixText: 'Rp ',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Batal'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final name = _nameController.text.trim();
+                      final limit = int.tryParse(_limitController.text) ?? 0;
+                      if (name.isEmpty || limit <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Nama dan limit budget harus diisi')),
+                        );
+                        return;
+                      }
+                      widget.onSave(name, limit, _selectedIcon);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: pinkAksen),
+                    child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

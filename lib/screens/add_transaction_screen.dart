@@ -9,6 +9,7 @@ import '../widgets/bank_dialog.dart';
 import '../widgets/ewallet_dialog.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart';
+import '../services/budget_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -91,7 +92,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       children: [
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => isIncome = true),
+            onTap: () => setState(() {
+              isIncome = true;
+              final incomeCats = _optionsService.getIncomeCategories();
+              selectedCategory = incomeCats.isNotEmpty ? incomeCats.first : 'Lainnya';
+            }),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -127,7 +132,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: GestureDetector(
-            onTap: () => setState(() => isIncome = false),
+            onTap: () => setState(() {
+              isIncome = false;
+              final budgetCats = BudgetService.instance.getBudgetCategories();
+              selectedCategory = budgetCats.isNotEmpty ? budgetCats.first.name : 'Lainnya';
+            }),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -180,6 +189,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             style: TextStyle(color: AppColors.textPrimary),
           ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 'Rp',
@@ -192,6 +202,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
+                  textAlignVertical: TextAlignVertical.center,
                   controller: _amountController,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
@@ -203,6 +214,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     border: InputBorder.none,
                     hintText: '0',
                     hintStyle: TextStyle(color: AppColors.textPrimary),
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
                   ),
                 ),
               ),
@@ -214,8 +227,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildCategorySection() {
-    final incomeCategories = _optionsService.getIncomeCategories();
-    final topCategories = incomeCategories.take(4).toList(growable: false);
+    final List<String> categories = isIncome
+        ? _optionsService.getIncomeCategories()
+        : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
+
+    final List<String> filteredCategories = categories.where((c) => c.toLowerCase() != 'lainnya').toList();
+    final List<String> topCategories = filteredCategories.take(3).toList(growable: true);
+    if (filteredCategories.length >= 3) {
+      topCategories.add('Lainnya');
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -249,6 +269,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   IconData _resolveCategoryIcon(String category) {
+    if (!isIncome && category != 'Lainnya') {
+      try {
+        final found = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == category);
+        return found.icon;
+      } catch (_) {}
+    }
     final lower = category.toLowerCase();
     if (lower.contains('gaji')) {
       return Icons.work;
@@ -309,6 +335,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       context: context,
       builder: (BuildContext context) {
         return CategoryDialog(
+          isIncome: isIncome,
           onCategorySelected: (String category) {
             setState(() {
               selectedCategory = category;

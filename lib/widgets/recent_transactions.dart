@@ -5,6 +5,7 @@ import '../services/transaction_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_formatters.dart';
 import '../screens/transaction_history_screen.dart';
+import 'transaction_details_sheet.dart';
 
 class RecentTransactions extends StatelessWidget {
   const RecentTransactions({super.key});
@@ -59,7 +60,7 @@ class RecentTransactions extends StatelessWidget {
                 final isLastItem = index == transactions.length - 1;
                 return Column(
                   children: [
-                    _buildTransaction(tx),
+                    _buildTransaction(context, tx),
                     if (!isLastItem)
                       const Divider(color: Colors.white, height: 24),
                   ],
@@ -72,48 +73,55 @@ class RecentTransactions extends StatelessWidget {
     );
   }
 
-  Widget _buildTransaction(TransactionModel transaction) {
-    return Row(
-      children: [
-        CircleAvatar(
-          backgroundColor: transaction.iconBg,
-          child: Icon(transaction.icon, color: transaction.iconColor),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                transaction.title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+  Widget _buildTransaction(BuildContext context, TransactionModel transaction) {
+    return InkWell(
+      onTap: () => showTransactionDetails(context, transaction),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: transaction.iconBg,
+              child: Icon(transaction.icon, color: transaction.iconColor),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.title,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    transaction.timeLabel,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                transaction.timeLabel,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
+            ),
+            Text(
+              formatSignedRupiah(transaction.amount),
+              style: TextStyle(
+                color: transaction.isIncome
+                    ? AppColors.incomeGreen
+                    : AppColors.expenseRed,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        Text(
-          formatSignedRupiah(transaction.amount),
-          style: TextStyle(
-            color: transaction.isIncome
-                ? AppColors.incomeGreen
-                : AppColors.expenseRed,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

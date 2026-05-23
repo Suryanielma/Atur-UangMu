@@ -8,6 +8,7 @@ import '../utils/no_animation_route.dart';
 import '../utils/app_formatters.dart';
 import 'add_transaction_screen.dart';
 import 'budget_settings_screen.dart';
+import '../widgets/transaction_details_sheet.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -603,6 +604,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
+        onTap: () => showTransactionDetails(context, tx),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(10),

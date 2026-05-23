@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import '../services/options_service.dart';
 import '../theme/app_colors.dart';
+import '../services/budget_service.dart';
 
 class CategoryDialog extends StatelessWidget {
   final Function(String) onCategorySelected;
+  final bool isIncome;
   static final OptionsService _optionsService = OptionsService.instance;
 
-  const CategoryDialog({super.key, required this.onCategorySelected});
+  const CategoryDialog({super.key, required this.onCategorySelected, this.isIncome = false});
 
   @override
   Widget build(BuildContext context) {
-    final categories = _optionsService.getExpenseCategories();
+    final categories = isIncome
+        ? _optionsService.getIncomeCategories()
+        : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
 
     return Dialog(
       backgroundColor: AppColors.cardBackgroundPurple,
@@ -45,12 +49,13 @@ class CategoryDialog extends StatelessWidget {
                     _resolveCategoryIcon(name),
                   ),
                 ),
-                _buildDialogItem(
-                  context,
-                  'Kategori\nBaru',
-                  Icons.add_circle,
-                  isCreateAction: true,
-                ),
+                if (isIncome)
+                  _buildDialogItem(
+                    context,
+                    'Kategori\nBaru',
+                    Icons.add_circle,
+                    isCreateAction: true,
+                  ),
               ],
             ),
           ],
@@ -97,6 +102,12 @@ class CategoryDialog extends StatelessWidget {
   }
 
   IconData _resolveCategoryIcon(String categoryName) {
+    if (!isIncome && categoryName != 'Lainnya') {
+      try {
+        final found = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == categoryName);
+        return found.icon;
+      } catch (_) {}
+    }
     final lower = categoryName.toLowerCase();
     if (lower.contains('listrik')) {
       return Icons.flash_on;
@@ -120,7 +131,10 @@ class CategoryDialog extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return NewCategoryDialog(onCategorySaved: onCategorySelected);
+        return NewCategoryDialog(
+          isIncome: isIncome,
+          onCategorySaved: onCategorySelected
+        );
       },
     );
   }
@@ -128,8 +142,9 @@ class CategoryDialog extends StatelessWidget {
 
 class NewCategoryDialog extends StatefulWidget {
   final Function(String) onCategorySaved;
+  final bool isIncome;
 
-  const NewCategoryDialog({super.key, required this.onCategorySaved});
+  const NewCategoryDialog({super.key, required this.onCategorySaved, this.isIncome = false});
 
   @override
   State<NewCategoryDialog> createState() => _NewCategoryDialogState();
@@ -277,7 +292,14 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   if (tempSelectedIcon != null &&
                       nameController.text.isNotEmpty) {
                     final categoryName = nameController.text.trim();
-                    OptionsService.instance.addExpenseCategory(categoryName);
+                    if (widget.isIncome) {
+                      OptionsService.instance.addExpenseCategory(categoryName); // Keep it simple for income
+                    } else {
+                      BudgetService.instance.addBudgetCategory(
+                        name: categoryName,
+                        limitAmount: 0,
+                      );
+                    }
                     widget.onCategorySaved(categoryName);
                     Navigator.pop(context);
                   }
