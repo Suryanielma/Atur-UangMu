@@ -30,6 +30,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   String categoryFilter = '';
   String paymentFilter = '';
 
+  int displayLimit = 5;
+
   late DateTime selectedMonth;
 
   @override
@@ -53,8 +55,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           categoryFilter: categoryFilter,
           paymentFilter: paymentFilter,
         );
+        
+        final visibleTransactions = filteredTransactions.take(displayLimit).toList();
+
         final groupedData = _transactionService.groupByLabel(
-          filteredTransactions,
+          visibleTransactions,
         );
         final summary = _dashboardService.getHistorySummary();
 
@@ -228,30 +233,35 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 ),
 
                 // Load More Button
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 10.0,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonBgPurple,
-                        foregroundColor: AppColors.textPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
+                if (displayLimit < filteredTransactions.length)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0,
+                        vertical: 10.0,
                       ),
-                      child: const Text(
-                        'Muat Lebih Banyak',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            displayLimit += 5;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.buttonBgPurple,
+                          foregroundColor: AppColors.textPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Muat Lebih Banyak',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                   ),
-                ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 20)),
               ],

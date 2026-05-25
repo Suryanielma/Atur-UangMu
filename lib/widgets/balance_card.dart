@@ -71,7 +71,7 @@ class _BalanceCardState extends State<BalanceCard> {
                   Expanded(
                     child: _buildSmallCard(
                       title: 'Pemasukan',
-                      amount: formatRupiah(summary.totalIncome),
+                      amount: _isBalanceVisible ? formatRupiah(summary.totalIncome) : 'Rp ******',
                       icon: Icons.arrow_downward,
                       bgColor: AppColors.incomeBg,
                       textColor: AppColors.incomeGreen,
@@ -81,7 +81,7 @@ class _BalanceCardState extends State<BalanceCard> {
                   Expanded(
                     child: _buildSmallCard(
                       title: 'Pengeluaran',
-                      amount: formatRupiah(summary.totalExpense),
+                      amount: _isBalanceVisible ? formatRupiah(summary.totalExpense) : 'Rp ******',
                       icon: Icons.arrow_upward,
                       bgColor: AppColors.expenseBg,
                       textColor: AppColors.expenseRed,
