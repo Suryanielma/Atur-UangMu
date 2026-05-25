@@ -47,6 +47,12 @@ class TransactionService {
             case 'bulan':
               matchesFilter = _isInMonth(tx, normalizedValue);
               break;
+            case 'rentang_waktu':
+            case 'tanggal_custom':
+              // Filter sementara, menampilkan semua jika rentang waktu dipilih
+              // Logika filter tanggal dapat ditambahkan nanti
+              matchesFilter = true;
+              break;
             case 'kategori':
               matchesFilter =
                   normalizedValue.isEmpty ||
