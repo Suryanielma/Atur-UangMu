@@ -255,11 +255,39 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final top = filtered.take(3).toList(growable: true);
     if (filtered.length >= 3) top.add('Lainnya');
 
-    return _sectionCard(
-      label: 'Kategori',
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: top.map((cat) => _buildCategoryItem(cat, _resolveCategoryIcon(cat))).toList(),
+    final List<String> filteredCategories = categories.where((c) => c.toLowerCase() != 'lainnya').toList();
+    final List<String> topCategories = filteredCategories.take(3).toList(growable: true);
+    if (filteredCategories.length >= 3) {
+      topCategories.add('Lainnya');
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackgroundPurple,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Kategori',
+            style: TextStyle(color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: topCategories.map(
+              (category) => _buildCategoryItem(
+                category,
+                _resolveCategoryIcon(category),
+              ),
+            ).toList(),
+          ),
+        ],
       ),
     );
   }
