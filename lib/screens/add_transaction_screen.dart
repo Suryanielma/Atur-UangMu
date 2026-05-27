@@ -257,11 +257,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     return _sectionCard(
       label: 'Kategori',
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        alignment: WrapAlignment.spaceBetween,
-        children: top.map((cat) => _buildCategoryItem(cat, _resolveCategoryIcon(cat))).toList(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final items = top.take(4).toList();
+          if (items.isEmpty) return const SizedBox.shrink();
+          final spacing = 12.0;
+          final itemWidth = (constraints.maxWidth - spacing * (items.length - 1)) / items.length;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (int i = 0; i < items.length; i++) ...[
+                SizedBox(
+                  width: itemWidth,
+                  child: _buildCategoryItem(items[i], _resolveCategoryIcon(items[i]), width: itemWidth),
+                ),
+                if (i != items.length - 1) const SizedBox(width: 12),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -281,7 +296,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Icons.category_outlined;
   }
 
-  Widget _buildCategoryItem(String title, IconData icon) {
+  Widget _buildCategoryItem(String title, IconData icon, {double width = 72}) {
     final isSelected = selectedCategory == title;
     return GestureDetector(
       onTap: () {
@@ -290,7 +305,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 72,
+        width: width,
         padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.rose : AppColors.surface, // Clean unselected state
