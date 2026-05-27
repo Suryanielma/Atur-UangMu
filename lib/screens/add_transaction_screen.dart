@@ -11,6 +11,7 @@ import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart';
 import '../services/budget_service.dart';
 import '../services/dashboard_service.dart';
+import '../models/budget_category_model.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
