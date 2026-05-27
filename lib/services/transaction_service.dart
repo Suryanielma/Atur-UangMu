@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/in_memory_data_store.dart';
 import '../models/transaction_model.dart';
-import '../utils/app_formatters.dart' show formatDateLabel, parseMonthYearKey;
+import '../utils/app_formatters.dart' show formatDateLabel, parseMonthYearKey, formatDateInput;
 
 class TransactionService {
   TransactionService._internal();
@@ -21,11 +21,13 @@ class TransactionService {
 
   List<TransactionModel> filterTransactions({
     required String searchQuery,
-    required String filterType,
-    String filterValue = '',
+    String? timeRangeType,
+    String? timeRangeValue,
+    String? typeFilter,
+    String? categoryFilter,
+    String? paymentFilter,
   }) {
     final normalizedQuery = searchQuery.toLowerCase().trim();
-    final normalizedValue = filterValue.toLowerCase().trim();
 
     return _store.historyTransactions
         .where((tx) {
@@ -38,41 +40,59 @@ class TransactionService {
               title.contains(normalizedQuery) ||
               category.contains(normalizedQuery);
 
-          if (filterType.isEmpty) {
-            return matchesQuery;
-          }
+          if (!matchesQuery) return false;
 
-          bool matchesFilter = false;
-          switch (filterType) {
-            case 'bulan':
-              matchesFilter = _isInMonth(tx, normalizedValue);
-              break;
-            case 'kategori':
-              matchesFilter =
-                  normalizedValue.isEmpty ||
-                  category.contains(normalizedValue) ||
-                  normalizedValue.contains(category);
-              break;
-            case 'pembayaran':
-              if (normalizedValue.isEmpty) {
-                matchesFilter = true;
-              } else if (normalizedValue == 'cash') {
-                matchesFilter = paymentMethod == 'cash';
-              } else if (normalizedValue == 'bank') {
-                matchesFilter = _store.bankOptions
-                    .map((e) => e.toLowerCase())
-                    .contains(paymentMethod);
-              } else if (normalizedValue == 'e-wallet') {
-                matchesFilter = _store.eWalletOptions
-                    .map((e) => e.toLowerCase())
-                    .contains(paymentMethod);
-              } else {
-                matchesFilter = paymentMethod == normalizedValue;
+          // Time range filter
+          if (timeRangeType != null && timeRangeType.isNotEmpty) {
+            final txDate = tx.createdAt ?? TransactionModel.inferDateFromGroupLabel(tx.groupLabel);
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+            final txDay = DateTime(txDate.year, txDate.month, txDate.day);
+
+            if (timeRangeType == 'bulan') {
+              if (timeRangeValue != null && !_isInMonth(tx, timeRangeValue)) {
+                return false;
               }
-              break;
+            } else if (timeRangeType == 'rentang_waktu') {
+              if (timeRangeValue == 'Hari ini') {
+                if (txDay != today) return false;
+              } else if (timeRangeValue == '7 Hari Terakhir') {
+                final difference = today.difference(txDay).inDays;
+                if (difference < 0 || difference > 7) return false;
+              }
+            } else if (timeRangeType == 'tanggal_custom') {
+              if (timeRangeValue != null && timeRangeValue != formatDateInput(txDate)) {
+                return false;
+              }
+            }
           }
 
-          return matchesQuery && matchesFilter;
+          // Type filter (Pemasukan / Pengeluaran)
+          if (typeFilter != null && typeFilter.isNotEmpty) {
+            if (typeFilter == 'pemasukan' && !tx.isIncome) return false;
+            if (typeFilter == 'pengeluaran' && tx.isIncome) return false;
+          }
+
+          // Category filter
+          if (categoryFilter != null && categoryFilter.isNotEmpty) {
+            final normalizedCatFilter = categoryFilter.toLowerCase().trim();
+            if (!category.contains(normalizedCatFilter) && !normalizedCatFilter.contains(category)) {
+              return false;
+            }
+          }
+
+          // Payment method filter
+          if (paymentFilter != null && paymentFilter.isNotEmpty) {
+            final normalizedPayFilter = paymentFilter.toLowerCase().trim();
+            if (normalizedPayFilter == 'cash' && paymentMethod != 'cash') return false;
+            if (normalizedPayFilter == 'bank' && !_store.bankOptions.map((e) => e.toLowerCase()).contains(paymentMethod)) return false;
+            if (normalizedPayFilter == 'e-wallet' && !_store.eWalletOptions.map((e) => e.toLowerCase()).contains(paymentMethod)) return false;
+            if (normalizedPayFilter != 'cash' && normalizedPayFilter != 'bank' && normalizedPayFilter != 'e-wallet') {
+              if (paymentMethod != normalizedPayFilter) return false;
+            }
+          }
+
+          return true;
         })
         .toList(growable: false);
   }

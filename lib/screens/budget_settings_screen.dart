@@ -4,6 +4,7 @@ import '../data/in_memory_data_store.dart';
 import '../models/budget_category_model.dart';
 import '../models/budget_settings_model.dart';
 import '../services/budget_service.dart';
+import '../services/dashboard_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_formatters.dart';
 import '../utils/no_animation_route.dart';
@@ -134,6 +135,25 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             onPressed: () {
               final budget =
                   int.tryParse(controller.text) ?? settings.monthlyBudget;
+              
+              final summary = DashboardService.instance.getHomeSummary();
+              if (budget > summary.totalIncome) {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Gagal', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                    content: const Text('Budget tidak boleh melebihi total pemasukan saat ini!'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+                return;
+              }
+
               _budgetService.updateMonthlyBudget(budget);
               Navigator.pop(context);
             },
@@ -638,6 +658,201 @@ class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget>
                 ),
                 child: GridView.builder(
                   padding: const EdgeInsets.all(8),
+value: v,
+      onChanged: onc,
+      activeThumbColor: pinkAksen,
+    );
+  }
+
+  Widget _tombolSimpan() {
+    return Container(
+      width: double.infinity,
+      height: 55,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [pinkAksen, unguTua]),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: ElevatedButton(
+        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pengaturan Berhasil Disimpan!')),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child: const Text(
+          'Simpan Pengaturan',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _header(String t, String a, {VoidCallback? onActionTap}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          t,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: unguTua,
+            fontSize: 16,
+          ),
+        ),
+        if (a.isNotEmpty)
+          GestureDetector(
+            onTap: onActionTap,
+            child: Text(
+              a,
+              style: TextStyle(
+                color: pinkAksen,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _bottomNav() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 3,
+        selectedItemColor: AppColors.textPrimary,
+        unselectedItemColor: Colors.white,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              noAnimationRoute(
+                builder: (context) => const AddTransactionScreen(),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              noAnimationRoute(
+                builder: (context) => const TransactionHistoryScreen(),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Transaksi',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Budget',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BudgetCategoryDialogWidget extends StatefulWidget {
+  final BudgetCategoryModel? initialCategory;
+  final Function(String name, int limit, IconData icon) onSave;
+
+  const BudgetCategoryDialogWidget({
+    super.key,
+    this.initialCategory,
+    required this.onSave,
+  });
+
+  @override
+  State<BudgetCategoryDialogWidget> createState() => _BudgetCategoryDialogWidgetState();
+}
+
+class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget> {
+  late TextEditingController _nameController;
+  late TextEditingController _limitController;
+  late IconData _selectedIcon;
+
+  final List<IconData> _iconOptions = [
+    Icons.fastfood,
+    Icons.shopping_bag,
+    Icons.directions_car,
+    Icons.home,
+    Icons.medical_services,
+    Icons.school,
+    Icons.pets,
+    Icons.sports_esports,
+    Icons.movie,
+    Icons.flight,
+    Icons.weekend,
+    Icons.computer,
+    Icons.bolt,
+    Icons.water_drop,
+    Icons.smartphone,
+    Icons.family_restroom,
+    Icons.card_giftcard,
+    Icons.category,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialCategory?.name ?? '');
+    _limitController = TextEditingController(
+      text: widget.initialCategory != null ? widget.initialCategory!.limitAmount.toString() : '',
+    );
+    _selectedIcon = widget.initialCategory?.icon ?? Icons.category;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _limitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.initialCategory == null ? 'Tambah Kategori' : 'Edit Kategori';
+    final Color unguTua = const Color(0xFF402273);
+    final Color pinkAksen = const Color(0xFFFE5897);
+
+    return Dialog(
+      backgroundColor: const Color(0xFFFCEEF6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(color: unguTua, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              const Text('Pilih Ikon', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 5,
                     mainAxisSpacing: 8,
@@ -666,23 +881,31 @@ class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget>
               const SizedBox(height: 16),
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Nama Kategori',
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _limitController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Limit Budget',
                   prefixText: 'Rp ',
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
               const SizedBox(height: 24),

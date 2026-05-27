@@ -40,7 +40,12 @@ class InMemoryDataStore extends ChangeNotifier {
         .toList(growable: false);
     return _homeBudgetOverview.copyWith(breakdown: breakdown);
   }
-  BudgetSettingsModel get budgetSettings => _budgetSettings;
+  BudgetSettingsModel get budgetSettings {
+    if (_budgetSettings.monthlyBudget > _homeSummary.totalIncome) {
+      return _budgetSettings.copyWith(monthlyBudget: _homeSummary.totalIncome);
+    }
+    return _budgetSettings;
+  }
   int get budgetSettingsTotalUsed => _budgetSettingsTotalUsed;
 
   UnmodifiableListView<BudgetCategoryModel> get budgetCategories =>

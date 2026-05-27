@@ -10,6 +10,7 @@ import '../widgets/ewallet_dialog.dart';
 import 'transaction_history_screen.dart';
 import 'budget_settings_screen.dart';
 import '../services/budget_service.dart';
+import '../services/dashboard_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -662,6 +663,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
 
+    if (!isIncome) {
+      final summary = DashboardService.instance.getHomeSummary();
+      if (amount > summary.totalBalance) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Saldo tidak mencukupi untuk pengeluaran ini.'),
+          ),
+        );
+        return;
+      }
+    }
+
     final now = DateTime.now();
     final dateToUse = selectedDate ?? now;
     
@@ -683,6 +696,97 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       transactionDate: finalDate,
       note: _notesController.text.trim(),
     );
+
+    if (!isIncome) {
+      final settings = BudgetService.instance.getBudgetSettings();
+      final totalUsed = BudgetService.instance.getBudgetSettingsTotalUsed();
+      final budget = settings.monthlyBudget;
+      
+      BudgetCategoryModel? category;
+      try {
+        category = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == selectedCategory);
+      } catch (_) {}
+
+      bool alertShown = false;
+
+      // 1. Cek Kategori Spesifik
+      if (category != null && category.limitAmount > 0) {
+        final ratio = category.usedAmount / category.limitAmount;
+        if (settings.notificationsEnabled && ratio >= 1.0) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text('Peringatan: Budget kategori ${category.name} sudah habis!'),
+               backgroundColor: Colors.redAccent,
+               behavior: SnackBarBehavior.floating,
+               margin: EdgeInsets.only(
+                 bottom: MediaQuery.sizeOf(context).height - 180,
+                 left: 16,
+                 right: 16,
+               ),
+             ),
+           );
+           alertShown = true;
+        } else if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text('Peringatan: Budget kategori ${category.name} sudah mencapai 80%!'),
+               backgroundColor: Colors.orange,
+               behavior: SnackBarBehavior.floating,
+               margin: EdgeInsets.only(
+                 bottom: MediaQuery.sizeOf(context).height - 180,
+                 left: 16,
+                 right: 16,
+               ),
+             ),
+           );
+           alertShown = true;
+        }
+      }
+
+      // 2. Cek Total Budget
+      if (!alertShown && budget > 0) {
+        final ratio = totalUsed / budget;
+        if (settings.notificationsEnabled && ratio >= 1.0) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: const Text('Peringatan: Budget bulanan Anda sudah habis!'),
+               backgroundColor: Colors.redAccent,
+               behavior: SnackBarBehavior.floating,
+               margin: EdgeInsets.only(
+                 bottom: MediaQuery.sizeOf(context).height - 180,
+                 left: 16,
+                 right: 16,
+               ),
+             ),
+           );
+           alertShown = true;
+        } else if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: const Text('Peringatan: Budget bulanan Anda sudah mencapai 80% dari limit!'),
+               backgroundColor: Colors.orange,
+               behavior: SnackBarBehavior.floating,
+               margin: EdgeInsets.only(
+                 bottom: MediaQuery.sizeOf(context).height - 180,
+                 left: 16,
+                 right: 16,
+               ),
+             ),
+           );
+           alertShown = true;
+        }
+      }
+
+      if (!alertShown) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Transaksi berhasil disimpan.')),
+         );
+      }
+    } else {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('Transaksi berhasil disimpan.')),
+       );
+    }
 
     Navigator.pop(context);
   }
