@@ -240,6 +240,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.cardBackgroundPurple,
@@ -254,16 +255,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             style: TextStyle(color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ...topCategories.map(
-                (category) => _buildCategoryItem(
-                  category,
-                  _resolveCategoryIcon(category),
-                ),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: topCategories.map(
+              (category) => _buildCategoryItem(
+                category,
+                _resolveCategoryIcon(category),
               ),
-            ],
+            ).toList(),
           ),
         ],
       ),
