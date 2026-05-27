@@ -31,6 +31,13 @@ class InMemoryDataStore extends ChangeNotifier {
   late List<String> _bankOptions;
   late List<String> _eWalletOptions;
 
+  final Map<String, IconData> _incomeCategoryIcons = {
+    'Gaji': Icons.work_outline_rounded,
+    'Bonus': Icons.card_giftcard_rounded,
+    'Investasi': Icons.show_chart_rounded,
+    'Lainnya': Icons.more_horiz_rounded,
+  };
+
   DashboardSummaryModel get homeSummary => _homeSummary;
   DashboardSummaryModel get historySummary => _historySummary;
   BudgetOverviewModel get homeBudgetOverview {
@@ -167,6 +174,26 @@ class InMemoryDataStore extends ChangeNotifier {
 
   void updateAutoReset(bool value) {
     _budgetSettings = _budgetSettings.copyWith(autoResetEnabled: value);
+    notifyListeners();
+  }
+
+  IconData getIncomeCategoryIcon(String category) {
+    return _incomeCategoryIcons[category] ?? Icons.category_outlined;
+  }
+
+  void addIncomeCategory(String category, {IconData icon = Icons.category_outlined}) {
+    final trimmed = category.trim();
+    if (trimmed.isEmpty) {
+      return;
+    }
+
+    _incomeCategoryIcons[trimmed] = icon;
+
+    if (_incomeCategories.contains(trimmed)) {
+      return;
+    }
+
+    _incomeCategories = [..._incomeCategories, trimmed];
     notifyListeners();
   }
 

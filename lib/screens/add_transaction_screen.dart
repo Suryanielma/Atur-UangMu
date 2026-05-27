@@ -253,7 +253,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
     final filtered = categories.where((c) => c.toLowerCase() != 'lainnya').toList();
     final top = filtered.take(3).toList(growable: true);
-    if (filtered.length >= 3) top.add('Lainnya');
+
+    if (selectedCategory.isNotEmpty && selectedCategory != 'Lainnya' && !top.contains(selectedCategory)) {
+      if (top.length >= 3) {
+        top[2] = selectedCategory;
+      } else {
+        top.add(selectedCategory);
+      }
+    }
+
+    if (filtered.length >= 3) {
+      if (!top.contains('Lainnya')) {
+        top.add('Lainnya');
+      }
+    }
 
     return _sectionCard(
       label: 'Kategori',
@@ -282,7 +295,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   IconData _resolveCategoryIcon(String category) {
-    if (!isIncome && category != 'Lainnya') {
+    if (isIncome) {
+      final icon = _optionsService.getIncomeCategoryIcon(category);
+      if (icon != Icons.category_outlined && icon != Icons.category) {
+        return icon;
+      }
+    } else if (category != 'Lainnya') {
       try {
         final found = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == category);
         return found.icon;

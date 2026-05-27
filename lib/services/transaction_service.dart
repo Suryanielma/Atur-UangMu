@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/in_memory_data_store.dart';
 import '../models/transaction_model.dart';
+import 'options_service.dart';
 import '../utils/app_formatters.dart' show formatDateLabel, parseMonthYearKey, formatDateInput;
 
 class TransactionService {
@@ -195,9 +196,12 @@ class TransactionService {
   }
 
   IconData _resolveIcon(String category, bool isIncome) {
-    final normalized = category.toLowerCase();
-
     if (isIncome) {
+      final customIcon = OptionsService.instance.getIncomeCategoryIcon(category);
+      if (customIcon != Icons.category_outlined && customIcon != Icons.category) {
+        return customIcon;
+      }
+      final normalized = category.toLowerCase();
       if (normalized.contains('gaji') || normalized.contains('pekerjaan')) {
         return Icons.work;
       }
@@ -210,6 +214,12 @@ class TransactionService {
       return Icons.account_balance_wallet;
     }
 
+    try {
+      final found = _store.budgetCategories.firstWhere((c) => c.name == category);
+      return found.icon;
+    } catch (_) {}
+
+    final normalized = category.toLowerCase();
     if (normalized.contains('makan') || normalized.contains('belanja')) {
       return Icons.shopping_basket;
     }

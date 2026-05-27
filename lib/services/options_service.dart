@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../data/in_memory_data_store.dart';
 
 class OptionsService {
@@ -21,6 +22,14 @@ class OptionsService {
 
   List<String> getEWalletOptions() {
     return _store.eWalletOptions;
+  }
+
+  IconData getIncomeCategoryIcon(String category) {
+    return _store.getIncomeCategoryIcon(category);
+  }
+
+  void addIncomeCategory(String category, {IconData icon = Icons.category_outlined}) {
+    _store.addIncomeCategory(category, icon: icon);
   }
 
   void addExpenseCategory(String category) {
