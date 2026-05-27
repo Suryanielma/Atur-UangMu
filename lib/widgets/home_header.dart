@@ -68,8 +68,8 @@ class HomeHeader extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Halo, $userDisplayName!',
-              style: TextStyle(
-                color: Colors.white,
+              style: const TextStyle(
+                color: AppColors.rose,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -80,8 +80,8 @@ class HomeHeader extends StatelessWidget {
         GestureDetector(
           onTap: () => _showNotification(context),
           child: const CircleAvatar(
-            backgroundColor: Colors.white,
-            child: Icon(Icons.notifications, color: AppColors.textPrimary),
+            backgroundColor: AppColors.roseBg,
+            child: Icon(Icons.notifications, color: AppColors.rose),
           ),
         ),
       ],

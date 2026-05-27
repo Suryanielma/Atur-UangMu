@@ -14,8 +14,7 @@ class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
 
   @override
-  State<TransactionHistoryScreen> createState() =>
-      _TransactionHistoryScreenState();
+  State<TransactionHistoryScreen> createState() => _TransactionHistoryScreenState();
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
@@ -66,101 +65,46 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-              onPressed: () {
-                Navigator.pop(context); // Kembali ke halaman Home
-              },
-            ),
-            title: const Text(
-              'Riwayat Transaksi',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.more_vert, color: AppColors.textPrimary),
-                onPressed: () {},
-              ),
-            ],
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text('Riwayat Transaksi', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
             centerTitle: false,
+            actions: [
+              IconButton(icon: const Icon(Icons.more_vert_rounded, color: AppColors.textPrimary), onPressed: () {}),
+            ],
           ),
           body: SafeArea(
             child: CustomScrollView(
               slivers: [
-                // Header: Summary Cards (Pemasukan, Pengeluaran)
                 SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    child: Row(
-                      children: [
-                        _buildSummaryCard(
-                          title: 'Pemasukan',
-                          amount: formatRupiah(summary.totalIncome),
-                          subtitle: 'Total Masuk',
-                          isIncome: true,
-                          backgroundColor: const Color(
-                            0xFFE2FBEA,
-                          ), // Light mint green
-                          iconColor: AppColors.incomeGreen,
-                        ),
-                        const SizedBox(width: 12),
-                        _buildSummaryCard(
-                          title: 'Pengeluaran',
-                          amount: formatRupiah(summary.totalExpense),
-                          subtitle: 'Total Keluar',
-                          isIncome: false,
-                          backgroundColor: const Color(
-                            0xFFFDF0DF,
-                          ), // White-ish/Light peach
-                          iconColor: AppColors.expenseRed,
-                        ),
-                      ],
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Row(children: [
+                      _buildSummaryCard(title: 'Pemasukan', amount: formatRupiah(summary.totalIncome), subtitle: 'Total Masuk', isIncome: true),
+                      const SizedBox(width: 12),
+                      _buildSummaryCard(title: 'Pengeluaran', amount: formatRupiah(summary.totalExpense), subtitle: 'Total Keluar', isIncome: false),
+                    ]),
                   ),
                 ),
-
-                // Search & Filter
                 SliverToBoxAdapter(
-                  child: Container(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        // Search Bar
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundPurple,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                searchQuery = value;
-                              });
-                            },
-                            decoration: const InputDecoration(
-                              hintText: 'Cari transaksi...',
-                              hintStyle: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 14,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: AppColors.textSecondary,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                            ),
+                    child: Column(children: [
+                      Container(
+                        decoration: BoxDecoration(color: AppColors.cardBackground, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.borderSubtle)),
+                        child: TextField(
+                          onChanged: (value) => setState(() => searchQuery = value),
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: const InputDecoration(
+                            hintText: 'Cari transaksi...',
+                            hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
+                            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textHint),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 14),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -200,34 +144,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     ),
                   ),
                 ),
-
-                // Transaction List Grouped by Date
                 SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final groupKey = groupedData.keys.elementAt(index);
                     final items = groupedData[groupKey]!;
-
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            groupKey,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ...items.map(_buildTransactionItem),
-                          const SizedBox(height: 8),
-                        ],
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(groupKey, style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 13)),
+                        const SizedBox(height: 10),
+                        ...items.map(_buildTransactionItem),
+                        const SizedBox(height: 8),
+                      ]),
                     );
                   }, childCount: groupedData.keys.length),
                 ),
@@ -273,101 +201,48 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  Widget _buildSummaryCard({
-    required String title,
-    required String amount,
-    required String subtitle,
-    required bool isIncome,
-    required Color backgroundColor,
-    required Color iconColor,
-  }) {
+  Widget _buildSummaryCard({required String title, required String amount, required String subtitle, required bool isIncome}) {
+    final color = isIncome ? AppColors.incomeGreen : AppColors.expenseRed;
+    final bgColor = isIncome ? AppColors.incomeBg : AppColors.expenseBg;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                  color: iconColor,
-                  size: 14,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: iconColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              amount,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(color: Colors.black54, fontSize: 11),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(18), border: Border.all(color: color.withOpacity(0.2))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded, color: color, size: 14),
+            const SizedBox(width: 5),
+            Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
+          ]),
+          const SizedBox(height: 10),
+          Text(amount, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 3),
+          Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+        ]),
       ),
     );
   }
 
-  void _showScrollableFilterSheet({
-    required String title,
-    required List<Widget> children,
-  }) {
+  void _showScrollableFilterSheet({required String title, required List<Widget> children}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.cardBackgroundPurple,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: AppColors.cardBackground,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (sheetContext) {
         final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.55;
-
         return SafeArea(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxHeight: maxHeight),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: children,
-                  ),
-                ),
-              ],
-            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 10),
+              Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.textHint, borderRadius: BorderRadius.circular(2))),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+                child: Text(title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+              Flexible(child: ListView(shrinkWrap: true, children: children)),
+            ]),
           ),
         );
       },
@@ -521,7 +396,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   void _showCategoryFilter() {
     final categories = _transactionService.getAvailableCategories();
-
     _showScrollableFilterSheet(
       title: 'Pilih Kategori',
       children: [
@@ -543,10 +417,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           ),
         ),
         ListTile(
-          title: const Text(
-            'Semua Kategori',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
+          title: const Text('Semua Kategori', style: TextStyle(color: AppColors.textSecondary)),
           onTap: () {
             setState(() {
               categoryFilter = '';
@@ -560,7 +431,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   void _showPaymentFilter() {
     final methods = _transactionService.getAvailablePaymentMethods();
-
     _showScrollableFilterSheet(
       title: 'Pilih Metode Pembayaran',
       children: [
@@ -582,10 +452,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           ),
         ),
         ListTile(
-          title: const Text(
-            'Semua Metode',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
+          title: const Text('Semua Metode', style: TextStyle(color: AppColors.textSecondary)),
           onTap: () {
             setState(() {
               paymentFilter = '';
@@ -613,37 +480,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.textPrimary : Colors.white,
+          gradient: isActive ? const LinearGradient(colors: AppColors.gradientPrimary) : null,
+          color: isActive ? null : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
-          border: isActive
-              ? null
-              : Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+          border: isActive ? null : Border.all(color: AppColors.borderDefault),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: isActive ? Colors.white : AppColors.textPrimary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: isActive ? Colors.white : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: 18,
-              color: isActive ? Colors.white : AppColors.textPrimary,
-            ),
-          ],
-        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.calendar_today_rounded, size: 14, color: isActive ? Colors.white : AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(color: isActive ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+          const SizedBox(width: 2),
+          Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: isActive ? Colors.white : AppColors.textSecondary),
+        ]),
       ),
     );
   }
@@ -664,29 +512,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.textPrimary : Colors.white,
+          gradient: isActive ? const LinearGradient(colors: AppColors.gradientPrimary) : null,
+          color: isActive ? null : AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
+          border: isActive ? null : Border.all(color: AppColors.borderDefault),
         ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isActive ? Colors.white : AppColors.textPrimary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              displayLabel,
-              style: TextStyle(
-                color: isActive ? Colors.white : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
+        child: Row(children: [
+          Icon(icon, size: 14, color: isActive ? Colors.white : AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Text(displayLabel, style: TextStyle(color: isActive ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+        ]),
       ),
     );
   }
@@ -694,99 +531,63 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget _buildTransactionItem(TransactionModel tx) {
     final isIncome = tx.isIncome;
     final displayAmount = formatSignedRupiah(tx.amount);
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardBackgroundPurple, // light purple card background
+        color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: ListTile(
         onTap: () => showTransactionDetails(context, tx),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(color: tx.iconBg, blurRadius: 4, spreadRadius: 2),
-            ],
+            boxShadow: [BoxShadow(color: tx.iconBg.withOpacity(0.3), blurRadius: 8, spreadRadius: 1)],
           ),
-          child: Icon(tx.icon, color: tx.iconColor, size: 24),
+          child: Icon(tx.icon, color: tx.iconColor, size: 22),
         ),
-        title: Text(
-          tx.title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
-        ),
-        subtitle: Text(
-          '${tx.category} • ${tx.timeLabel}',
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-        ),
+        title: Text(tx.title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
+        subtitle: Text('${tx.category} • ${tx.timeLabel}', style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
         trailing: Text(
           displayAmount,
-          style: TextStyle(
-            color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed,
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
+          style: TextStyle(color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed, fontWeight: FontWeight.bold, fontSize: 14),
         ),
       ),
     );
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.textPrimary,
-        unselectedItemColor: Colors.white,
-        currentIndex: 2, // 2 = Riwayat
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.popUntil(
-              context,
-              (route) => route.isFirst,
-            ); // Kembali ke Beranda
-          } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              noAnimationRoute(
-                builder: (context) => const AddTransactionScreen(),
-              ),
-            );
-          } else if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              noAnimationRoute(
-                builder: (context) => const BudgetSettingsScreen(),
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: 'Transaksi',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Budget',
-          ),
-        ],
-      ),
-    );
-  }
+  return Container(
+    decoration: const BoxDecoration(
+      color: AppColors.cardBackground,
+      border: Border(top: BorderSide(color: AppColors.borderSubtle, width: 1)),
+    ),
+    child: BottomNavigationBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      type: BottomNavigationBarType.fixed,
+      currentIndex: 2,
+      selectedItemColor: AppColors.rose,
+      unselectedItemColor: AppColors.textHint,
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+      unselectedLabelStyle: const TextStyle(fontSize: 11),
+      onTap: (index) {
+        if (index == 0) Navigator.popUntil(context, (route) => route.isFirst);
+        else if (index == 1) Navigator.pushReplacement(context, noAnimationRoute(builder: (_) => const AddTransactionScreen()));
+        else if (index == 3) Navigator.pushReplacement(context, noAnimationRoute(builder: (_) => const BudgetSettingsScreen()));
+      },
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
+        BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Transaksi'),
+        BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Riwayat'),
+        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Budget'),
+      ],
+    ),
+  );
+}
+  
 }

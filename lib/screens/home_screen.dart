@@ -8,7 +8,7 @@ import '../widgets/budget_card.dart';
 import '../widgets/recent_transactions.dart';
 import '../utils/no_animation_route.dart';
 import 'transaction_history_screen.dart';
-import 'budget_settings_screen.dart'; // Sudah ter-import
+import 'budget_settings_screen.dart';
 import 'add_transaction_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,11 +17,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          AppColors.background, // Menggunakan warna latar belakang dari tema
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -33,21 +32,13 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               const ExpenseChart(),
               const SizedBox(height: 16),
-
-              // PERBAIKAN: Membungkus BudgetCard agar bisa diklik dari dashboard
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BudgetSettingsScreen(),
-                    ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(15),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BudgetSettingsScreen()),
+                ),
                 child: const BudgetCard(),
               ),
-
               const SizedBox(height: 16),
               const RecentTransactions(),
               const SizedBox(height: 20),
@@ -62,55 +53,35 @@ class HomeScreen extends StatelessWidget {
   Widget _buildBottomNav(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
+        color: AppColors.cardBackground,
+        border: Border(top: BorderSide(color: AppColors.borderSubtle, width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        type: BottomNavigationBarType
-            .fixed, // Tetap menampilkan label di menu bawah
-        selectedItemColor: AppColors.textPrimary,
-        unselectedItemColor: Colors.white,
-        currentIndex: 0, // Indeks 0 menandakan kita sedang di Beranda
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppColors.rose,
+        unselectedItemColor: AppColors.textHint,
+        currentIndex: 0,
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
         onTap: (index) {
           if (index == 1) {
-            Navigator.push(
-              context,
-              noAnimationRoute(
-                builder: (context) => const AddTransactionScreen(),
-              ),
-            );
+            Navigator.push(context, noAnimationRoute(builder: (_) => const AddTransactionScreen()));
           } else if (index == 2) {
-            // Navigasi ke Riwayat Transaksi
-            Navigator.push(
-              context,
-              noAnimationRoute(
-                builder: (context) => const TransactionHistoryScreen(),
-              ),
-            );
+            Navigator.push(context, noAnimationRoute(builder: (_) => const TransactionHistoryScreen()));
           } else if (index == 3) {
-            // Navigasi ke Pengaturan Budget
-            Navigator.push(
-              context,
-              noAnimationRoute(
-                builder: (context) => const BudgetSettingsScreen(),
-              ),
-            );
+            Navigator.push(context, noAnimationRoute(builder: (_) => const BudgetSettingsScreen()));
           }
         },
-
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: 'Transaksi',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Budget',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Transaksi'),
+          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Riwayat'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Budget'),
         ],
       ),
     );

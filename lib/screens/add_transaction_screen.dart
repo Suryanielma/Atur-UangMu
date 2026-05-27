@@ -35,11 +35,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void initState() {
     super.initState();
     final incomeCategories = _optionsService.getIncomeCategories();
-    selectedCategory = incomeCategories.isNotEmpty
-        ? incomeCategories.first
-        : 'Lainnya';
+    selectedCategory = incomeCategories.isNotEmpty ? incomeCategories.first : 'Lainnya';
     selectedDate = DateTime.now();
     _dateController.text = formatDateInput(selectedDate!);
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _notesController.dispose();
+    _dateController.dispose();
+    super.dispose();
   }
 
   @override
@@ -49,36 +55,45 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 16),
+          ),
         ),
         title: const Text(
           'Catat Transaksi',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            letterSpacing: -0.3,
           ),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           children: [
             _buildTypeToggle(),
             const SizedBox(height: 20),
             _buildAmountInput(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             _buildCategorySection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             _buildPaymentMethodSection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             _buildDateSection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             _buildNotesSection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             _buildActionButtons(),
             const SizedBox(height: 40),
           ],
@@ -89,132 +104,130 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildTypeToggle() {
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.cardElevated,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _toggleTab(
+            label: 'Pemasukan',
+            icon: Icons.south_rounded,
+            isActive: isIncome,
+            activeColor: AppColors.incomeGreen,
             onTap: () => setState(() {
               isIncome = true;
-              final incomeCats = _optionsService.getIncomeCategories();
-              selectedCategory = incomeCats.isNotEmpty ? incomeCats.first : 'Lainnya';
+              final cats = _optionsService.getIncomeCategories();
+              selectedCategory = cats.isNotEmpty ? cats.first : 'Lainnya';
             }),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: isIncome
-                    ? AppColors.incomeBg.withValues(alpha: 0.5)
-                    : Colors.white.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isIncome ? AppColors.incomeGreen : Colors.transparent,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.arrow_downward,
-                    color: isIncome ? AppColors.incomeGreen : Colors.grey,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Pemasukan',
-                    style: TextStyle(
-                      color: isIncome ? AppColors.incomeGreen : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
+          )),
+          Expanded(child: _toggleTab(
+            label: 'Pengeluaran',
+            icon: Icons.north_rounded,
+            isActive: !isIncome,
+            activeColor: AppColors.expenseRed,
             onTap: () => setState(() {
               isIncome = false;
-              final budgetCats = BudgetService.instance.getBudgetCategories();
-              selectedCategory = budgetCats.isNotEmpty ? budgetCats.first.name : 'Lainnya';
+              final cats = BudgetService.instance.getBudgetCategories();
+              selectedCategory = cats.isNotEmpty ? cats.first.name : 'Lainnya';
             }),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: !isIncome
-                    ? AppColors.expenseBg.withValues(alpha: 0.5)
-                    : Colors.white.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: !isIncome ? AppColors.expenseRed : Colors.transparent,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.arrow_upward,
-                    color: !isIncome ? AppColors.expenseRed : Colors.grey,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Pengeluaran',
-                    style: TextStyle(
-                      color: !isIncome ? AppColors.expenseRed : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleTab({
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required Color activeColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.cardBackground : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isActive
+              ? [BoxShadow(color: AppColors.borderSubtle, blurRadius: 8, offset: const Offset(0, 2))]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: isActive ? activeColor : AppColors.textHint, size: 16),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? AppColors.textPrimary : AppColors.textHint,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 14,
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildAmountInput() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Jumlah Uang',
-            style: TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(
+              color: AppColors.textHint,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
           ),
+          const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'Rp',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.rose,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: TextField(
-                  textAlignVertical: TextAlignVertical.center,
                   controller: _amountController,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.5,
                   ),
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     hintText: '0',
-                    hintStyle: TextStyle(color: AppColors.textPrimary),
+                    hintStyle: TextStyle(
+                      color: AppColors.borderDefault,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                    ),
                     contentPadding: EdgeInsets.zero,
                     isDense: true,
                   ),
@@ -231,40 +244,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final List<String> categories = isIncome
         ? _optionsService.getIncomeCategories()
         : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
+    final filtered = categories.where((c) => c.toLowerCase() != 'lainnya').toList();
+    final top = filtered.take(3).toList(growable: true);
+    if (filtered.length >= 3) top.add('Lainnya');
 
-    final List<String> filteredCategories = categories.where((c) => c.toLowerCase() != 'lainnya').toList();
-    final List<String> topCategories = filteredCategories.take(3).toList(growable: true);
-    if (filteredCategories.length >= 3) {
-      topCategories.add('Lainnya');
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackgroundPurple,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Kategori',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ...topCategories.map(
-                (category) => _buildCategoryItem(
-                  category,
-                  _resolveCategoryIcon(category),
-                ),
-              ),
-            ],
-          ),
-        ],
+    return _sectionCard(
+      label: 'Kategori',
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: top.map((cat) => _buildCategoryItem(cat, _resolveCategoryIcon(cat))).toList(),
       ),
     );
   }
@@ -277,53 +265,45 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       } catch (_) {}
     }
     final lower = category.toLowerCase();
-    if (lower.contains('gaji')) {
-      return Icons.work;
-    }
-    if (lower.contains('bonus')) {
-      return Icons.card_giftcard;
-    }
-    if (lower.contains('investasi')) {
-      return Icons.show_chart;
-    }
-    if (lower.contains('lain')) {
-      return Icons.more_horiz;
-    }
-    return Icons.category;
+    if (lower.contains('gaji')) return Icons.work_outline_rounded;
+    if (lower.contains('bonus')) return Icons.card_giftcard_rounded;
+    if (lower.contains('investasi')) return Icons.show_chart_rounded;
+    if (lower.contains('lain')) return Icons.more_horiz_rounded;
+    return Icons.category_outlined;
   }
 
   Widget _buildCategoryItem(String title, IconData icon) {
-    bool isSelected = selectedCategory == title;
+    final isSelected = selectedCategory == title;
     return GestureDetector(
       onTap: () {
         setState(() => selectedCategory = title);
-        if (title == 'Lainnya') {
-          _showLainnyaDialog(context);
-        }
+        if (title == 'Lainnya') _showLainnyaDialog(context);
       },
-      child: Container(
-        width: 70,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 72,
+        padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.rose : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : Colors.transparent,
-            width: 1,
+            color: isSelected ? AppColors.rose : AppColors.borderSubtle,
           ),
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppColors.textPrimary),
-            const SizedBox(height: 8),
+            Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 22),
+            const SizedBox(height: 7),
             Text(
               title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 12,
+              style: TextStyle(
+                color: isSelected ? Colors.white : AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -334,91 +314,44 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void _showLainnyaDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return CategoryDialog(
-          isIncome: isIncome,
-          onCategorySelected: (String category) {
-            setState(() {
-              selectedCategory = category;
-            });
-          },
-        );
-      },
+      builder: (context) => CategoryDialog(
+        isIncome: isIncome,
+        onCategorySelected: (cat) => setState(() => selectedCategory = cat),
+      ),
     );
   }
 
   Widget _buildPaymentMethodSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 1),
-      ),
+    return _sectionCard(
+      label: 'Metode Pembayaran',
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Metode Pembayaran',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 16),
-          _buildPaymentItem('Cash', Icons.money, Colors.green),
-          const SizedBox(height: 12),
-          _buildPaymentItem(
-            'Bank',
-            Icons.account_balance,
-            Colors.blue,
-            hasArrow: true,
-            onTapOverride: () {
-              setState(() => selectedMethod = 'Bank');
-              _showBankDialog(context);
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildPaymentItem(
-            'E-Wallet',
-            Icons.account_balance_wallet,
-            Colors.purple,
-            hasArrow: true,
-            onTapOverride: () {
-              setState(() => selectedMethod = 'E-Wallet');
-              _showEWalletDialog(context);
-            },
-          ),
+          _buildPaymentItem('Cash', Icons.payments_outlined, AppColors.incomeGreen),
+          const SizedBox(height: 8),
+          _buildPaymentItem('Bank', Icons.account_balance_outlined, AppColors.sand,
+              hasArrow: true,
+              onTapOverride: () {
+                setState(() => selectedMethod = 'Bank');
+                _showBankDialog(context);
+              }),
+          const SizedBox(height: 8),
+          _buildPaymentItem('E-Wallet', Icons.account_balance_wallet_outlined, AppColors.rose,
+              hasArrow: true,
+              onTapOverride: () {
+                setState(() => selectedMethod = 'E-Wallet');
+                _showEWalletDialog(context);
+              }),
         ],
       ),
     );
   }
 
   void _showBankDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return BankDialog(
-          onBankSelected: (String bank) {
-            setState(() {
-              selectedMethod = bank;
-            });
-          },
-        );
-      },
-    );
+    showDialog(context: context, builder: (_) => BankDialog(onBankSelected: (bank) => setState(() => selectedMethod = bank)));
   }
 
   void _showEWalletDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return EWalletDialog(
-          onEWalletSelected: (String ewallet) {
-            setState(() {
-              selectedMethod = ewallet;
-            });
-          },
-        );
-      },
-    );
+    showDialog(context: context, builder: (_) => EWalletDialog(onEWalletSelected: (ew) => setState(() => selectedMethod = ew)));
   }
 
   Widget _buildPaymentItem(
@@ -430,55 +363,57 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }) {
     final bankOptions = _optionsService.getBankOptions();
     final eWalletOptions = _optionsService.getEWalletOptions();
-
-    // Treat selectedMethod as selected if it matches title OR if title is 'Bank' and we have selected a bank
-    // OR if title is 'E-Wallet' and we have selected an E-Wallet
-    bool isSelected =
-        selectedMethod == title ||
+    final isSelected = selectedMethod == title ||
         (title == 'Bank' && bankOptions.contains(selectedMethod)) ||
         (title == 'E-Wallet' && eWalletOptions.contains(selectedMethod));
 
     String displayTitle = title;
-    if (title == 'Bank' && isSelected && selectedMethod != 'Bank') {
-      displayTitle = selectedMethod;
-    } else if (title == 'E-Wallet' &&
-        isSelected &&
-        selectedMethod != 'E-Wallet') {
-      displayTitle = selectedMethod;
-    }
+    if (title == 'Bank' && isSelected && selectedMethod != 'Bank') displayTitle = selectedMethod;
+    if (title == 'E-Wallet' && isSelected && selectedMethod != 'E-Wallet') displayTitle = selectedMethod;
 
     return GestureDetector(
       onTap: onTapOverride ?? () => setState(() => selectedMethod = title),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.roseBg : AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : Colors.transparent,
-            width: 1,
+            color: isSelected ? AppColors.roseLight : AppColors.borderSubtle,
           ),
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: iconColor.withValues(alpha: 0.2),
-              radius: 16,
-              child: Icon(icon, color: iconColor, size: 16),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 displayTitle,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
+                style: TextStyle(
+                  color: isSelected ? AppColors.rose : AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 14,
                 ),
               ),
             ),
-            if (hasArrow) const Icon(Icons.chevron_right, color: Colors.grey),
+            if (isSelected)
+              Container(
+                width: 20,
+                height: 20,
+                decoration: const BoxDecoration(color: AppColors.rose, shape: BoxShape.circle),
+                child: const Icon(Icons.check_rounded, color: Colors.white, size: 13),
+              )
+            else if (hasArrow)
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textHint, size: 20),
           ],
         ),
       ),
@@ -486,52 +421,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildDateSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackgroundPurple,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Tanggal Transaksi',
-            style: TextStyle(color: AppColors.textPrimary),
+    return _sectionCard(
+      label: 'Tanggal Transaksi',
+      child: GestureDetector(
+        onTap: _selectDate,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _dateController,
-                    readOnly: true,
-                    onTap: _selectDate,
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'mm/dd/yyyy',
-                      hintStyle: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_month_rounded, color: AppColors.rose, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _dateController.text.isEmpty ? 'Pilih tanggal' : _dateController.text,
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
                 ),
-                GestureDetector(
-                  onTap: _selectDate,
-                  child: const Icon(Icons.calendar_month, color: Colors.grey),
-                ),
-              ],
-            ),
+              ),
+              const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textHint, size: 20),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -543,62 +457,72 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       initialDate: selectedDate ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(
+            primary: AppColors.rose,
+            onPrimary: Colors.white,
+            surface: AppColors.cardBackground,
+            onSurface: AppColors.textPrimary,
+          ),
+        ),
+        child: child!,
+      ),
     );
     if (picked != null) {
       setState(() {
-        selectedDate = DateTime(
-          picked.year,
-          picked.month,
-          picked.day,
-          now.hour,
-          now.minute,
-          now.second,
-        );
+        selectedDate = DateTime(picked.year, picked.month, picked.day, now.hour, now.minute, now.second);
         _dateController.text = formatDateInput(selectedDate!);
       });
     }
   }
 
-  @override
-  void dispose() {
-    _amountController.dispose();
-    _notesController.dispose();
-    _dateController.dispose();
-    super.dispose();
+  Widget _buildNotesSection() {
+    return _sectionCard(
+      label: 'Catatan (Opsional)',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: TextField(
+          controller: _notesController,
+          maxLines: 3,
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Tambahkan catatan...',
+            hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildNotesSection() {
+  Widget _sectionCard({required String label, required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white, width: 1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Catatan Tambahan (Opsional)',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextField(
-              controller: _notesController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Tambahkan catatan...',
-                hintStyle: TextStyle(color: AppColors.textPrimary),
-              ),
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              color: AppColors.textHint,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
             ),
           ),
+          const SizedBox(height: 14),
+          child,
         ],
       ),
     );
@@ -607,44 +531,47 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildActionButtons() {
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _saveTransaction,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.cardBackgroundPurple,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
+        GestureDetector(
+          onTap: _saveTransaction,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 17),
+            decoration: BoxDecoration(
+              color: AppColors.rose,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(color: AppColors.rose.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
+              ],
             ),
-            child: const Text(
-              'Simpan Transaksi',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            child: const Center(
+              child: Text(
+                'Simpan Transaksi',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.cardBackground,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 17),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.borderSubtle),
             ),
-            child: const Text(
-              'Batal',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+            child: const Center(
+              child: Text(
+                'Batal',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ),
@@ -656,8 +583,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final amount = _transactionService.parseAmount(_amountController.text);
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan nominal transaksi terlebih dahulu.'),
+        SnackBar(
+          content: const Text('Masukkan nominal transaksi terlebih dahulu.'),
+          backgroundColor: AppColors.rose,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -677,17 +607,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     final now = DateTime.now();
     final dateToUse = selectedDate ?? now;
-    
-    // Pastikan waktunya menggunakan waktu saat tombol simpan ditekan
-    final finalDate = DateTime(
-      dateToUse.year,
-      dateToUse.month,
-      dateToUse.day,
-      now.hour,
-      now.minute,
-      now.second,
-    );
-
+    final finalDate = DateTime(dateToUse.year, dateToUse.month, dateToUse.day, now.hour, now.minute, now.second);
     _transactionService.addTransaction(
       isIncome: isIncome,
       amount: amount,
@@ -794,46 +714,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildBottomNav() {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(top: BorderSide(color: Colors.white24, width: 1)),
+        color: AppColors.cardBackground,
+        border: Border(top: BorderSide(color: AppColors.borderSubtle, width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.textPrimary,
-        unselectedItemColor: Colors.white,
-        currentIndex: 1, // Focus on "Transaksi"
+        selectedItemColor: AppColors.rose,
+        unselectedItemColor: AppColors.textHint,
+        currentIndex: 1,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
         onTap: (index) {
-          if (index == 0) {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          } else if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              noAnimationRoute(
-                builder: (context) => const TransactionHistoryScreen(),
-              ),
-            );
-          } else if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              noAnimationRoute(
-                builder: (context) => const BudgetSettingsScreen(),
-              ),
-            );
-          }
+          if (index == 0) Navigator.popUntil(context, (route) => route.isFirst);
+          else if (index == 2) Navigator.pushReplacement(context, noAnimationRoute(builder: (_) => const TransactionHistoryScreen()));
+          else if (index == 3) Navigator.pushReplacement(context, noAnimationRoute(builder: (_) => const BudgetSettingsScreen()));
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: 'Transaksi',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Budget',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Transaksi'),
+          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Riwayat'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Budget'),
         ],
       ),
     );

@@ -1,6 +1,3 @@
-// Widget untuk menampilkan saldo total, pemasukan, dan pengeluaran di halaman dashboard. 
-// menyediakan fitur untuk menyembunyikan atau menampilkan saldo sesuai keinginan pengguna.
-
 import 'package:flutter/material.dart';
 import '../data/in_memory_data_store.dart';
 import '../services/dashboard_service.dart';
@@ -30,6 +27,7 @@ class _BalanceCardState extends State<BalanceCard> {
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,9 +46,7 @@ class _BalanceCardState extends State<BalanceCard> {
                       });
                     },
                     child: Icon(
-                      _isBalanceVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
                       color: AppColors.textSecondary,
                       size: 20,
                     ),
@@ -59,9 +55,7 @@ class _BalanceCardState extends State<BalanceCard> {
               ),
               const SizedBox(height: 8),
               Text(
-                _isBalanceVisible
-                    ? formatRupiah(summary.totalBalance)
-                    : 'Rp *********',
+                _isBalanceVisible ? formatRupiah(summary.totalBalance) : 'Rp *********',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 32,
@@ -119,7 +113,7 @@ class _BalanceCardState extends State<BalanceCard> {
             children: [
               CircleAvatar(
                 radius: 10,
-                backgroundColor: Colors.white.withValues(alpha: 0.5),
+                backgroundColor: AppColors.cardBackground,
                 child: Icon(icon, color: textColor, size: 14),
               ),
               const SizedBox(width: 6),

@@ -6,7 +6,7 @@ import '../utils/app_formatters.dart';
 void showTransactionDetails(BuildContext context, TransactionModel tx) {
   showModalBottomSheet(
     context: context,
-    backgroundColor: AppColors.cardBackgroundPurple,
+    backgroundColor: AppColors.cardElevated,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -25,7 +25,7 @@ void showTransactionDetails(BuildContext context, TransactionModel tx) {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: AppColors.borderDefault,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -72,7 +72,7 @@ void showTransactionDetails(BuildContext context, TransactionModel tx) {
                 _buildDetailRow('Catatan', tx.note),
               ],
               const SizedBox(height: 16),
-              const Divider(color: Colors.white24),
+              const Divider(color: AppColors.borderSubtle),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

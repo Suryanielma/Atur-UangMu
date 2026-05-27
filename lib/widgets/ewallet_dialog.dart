@@ -21,7 +21,7 @@ class EWalletDialog extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF3D8E5),
+              color: AppColors.cardElevated,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
@@ -30,15 +30,16 @@ class EWalletDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: AppColors.cardBackground,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderSubtle),
                   ),
                   child: const TextField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.search, color: Colors.grey),
+                      icon: Icon(Icons.search, color: AppColors.textHint),
                       hintText: 'Cari E-Wallet....',
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                      hintStyle: TextStyle(color: AppColors.textHint, fontSize: 16),
                     ),
                   ),
                 ),
@@ -46,10 +47,8 @@ class EWalletDialog extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      _showAddEWalletDialog(context);
-                    },
-                    icon: const Icon(Icons.add, color: AppColors.textPrimary),
+                    onPressed: () => _showAddEWalletDialog(context),
+                    icon: const Icon(Icons.add, color: AppColors.rose),
                     label: const Text(
                       'Tambah E-Wallet',
                       style: TextStyle(
@@ -59,7 +58,7 @@ class EWalletDialog extends StatelessWidget {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.cardBackground,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -73,11 +72,9 @@ class EWalletDialog extends StatelessWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: eWallets.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      return _buildEWalletItem(eWallets[index], context);
-                    },
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) =>
+                        _buildEWalletItem(eWallets[index], context),
                   ),
                 ),
               ],
@@ -97,17 +94,18 @@ class EWalletDialog extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderSubtle),
         ),
         child: Row(
           children: [
-            const CircleAvatar(
-              backgroundColor: Color(0xFFE8F0FE),
+            CircleAvatar(
+              backgroundColor: AppColors.roseBg,
               radius: 20,
-              child: Icon(
+              child: const Icon(
                 Icons.account_balance_wallet,
-                color: Colors.purple,
+                color: AppColors.rose,
                 size: 20,
               ),
             ),
@@ -122,7 +120,7 @@ class EWalletDialog extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            const Icon(Icons.chevron_right, color: AppColors.textHint),
           ],
         ),
       ),
@@ -135,10 +133,8 @@ class EWalletDialog extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: AppColors.cardBackgroundPurple,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          backgroundColor: AppColors.cardElevated,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -148,48 +144,40 @@ class EWalletDialog extends StatelessWidget {
                 const Text(
                   'Tambah E-Wallet',
                   style: TextStyle(
-                    color: Color(0xFF333A44),
+                    color: AppColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Nama E-Wallet',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                ),
+                const Text('Nama E-Wallet',
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 14)),
                 const SizedBox(height: 8),
                 TextField(
                   autofocus: true,
                   style: const TextStyle(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.cardBackground,
                     hintText: 'Masukkan nama E-Wallet',
-                    hintStyle: const TextStyle(color: Colors.grey),
+                    hintStyle: const TextStyle(color: AppColors.textHint),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  onChanged: (value) {
-                    newEWalletName = value;
-                  },
+                  onChanged: (value) => newEWalletName = value,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttonBg,
-                      foregroundColor: AppColors.textPrimary,
+                      backgroundColor: AppColors.rose,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     onPressed: () {
@@ -201,10 +189,8 @@ class EWalletDialog extends StatelessWidget {
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text(
-                      'Simpan',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    child: const Text('Simpan',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

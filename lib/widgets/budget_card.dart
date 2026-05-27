@@ -21,6 +21,7 @@ class BudgetCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,13 +29,8 @@ class BudgetCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: AppColors.textPrimary.withValues(
-                      alpha: 0.1,
-                    ),
-                    child: const Icon(
-                      Icons.pie_chart,
-                      color: AppColors.textPrimary,
-                    ),
+                    backgroundColor: AppColors.roseBg,
+                    child: const Icon(Icons.pie_chart, color: AppColors.rose),
                   ),
                   const SizedBox(width: 12),
                   const Text(
@@ -67,10 +63,8 @@ class BudgetCard extends StatelessWidget {
               const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: overview.usageRatio,
-                backgroundColor: AppColors.textSecondary.withValues(alpha: 0.2),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.textSecondary,
-                ),
+                backgroundColor: AppColors.borderSubtle,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.rose),
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -78,35 +72,6 @@ class BudgetCard extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCategory(String title, String amount) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            amount,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

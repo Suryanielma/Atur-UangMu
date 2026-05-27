@@ -17,7 +17,7 @@ class CategoryDialog extends StatelessWidget {
         : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
 
     return Dialog(
-      backgroundColor: AppColors.cardBackgroundPurple,
+      backgroundColor: AppColors.cardElevated,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -28,7 +28,7 @@ class CategoryDialog extends StatelessWidget {
             const Text(
               'Detail Lainnya',
               style: TextStyle(
-                color: Color(0xFF333A44),
+                color: AppColors.textPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -42,20 +42,9 @@ class CategoryDialog extends StatelessWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 0.85,
               children: [
-                ...categories.map(
-                  (name) => _buildDialogItem(
-                    context,
-                    name,
-                    _resolveCategoryIcon(name),
-                  ),
-                ),
+                ...categories.map((name) => _buildDialogItem(context, name, _resolveCategoryIcon(name))),
                 if (isIncome)
-                  _buildDialogItem(
-                    context,
-                    'Kategori\nBaru',
-                    Icons.add_circle,
-                    isCreateAction: true,
-                  ),
+                  _buildDialogItem(context, 'Kategori\nBaru', Icons.add_circle, isCreateAction: true),
               ],
             ),
           ],
@@ -64,16 +53,11 @@ class CategoryDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDialogItem(
-    BuildContext context,
-    String title,
-    IconData icon, {
-    bool isCreateAction = false,
-  }) {
+  Widget _buildDialogItem(BuildContext context, String title, IconData icon, {bool isCreateAction = false}) {
     return GestureDetector(
       onTap: () {
         if (isCreateAction) {
-          Navigator.pop(context); // Close the current dialog
+          Navigator.pop(context);
           _showNewCategoryDialog(context);
         } else {
           onCategorySelected(title);
@@ -82,18 +66,19 @@ class CategoryDialog extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.borderSubtle),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: const Color(0xFF4A5568), size: 32),
+            Icon(icon, color: AppColors.textSecondary, size: 32),
             const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF4A5568), fontSize: 12),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
             ),
           ],
         ),
@@ -109,33 +94,21 @@ class CategoryDialog extends StatelessWidget {
       } catch (_) {}
     }
     final lower = categoryName.toLowerCase();
-    if (lower.contains('listrik')) {
-      return Icons.flash_on;
-    }
-    if (lower.contains('air')) {
-      return Icons.water_drop;
-    }
-    if (lower.contains('pulsa')) {
-      return Icons.smartphone;
-    }
-    if (lower.contains('asuransi')) {
-      return Icons.verified;
-    }
-    if (lower.contains('belanja')) {
-      return Icons.shopping_bag;
-    }
+    if (lower.contains('listrik')) return Icons.flash_on;
+    if (lower.contains('air')) return Icons.water_drop;
+    if (lower.contains('pulsa')) return Icons.smartphone;
+    if (lower.contains('asuransi')) return Icons.verified;
+    if (lower.contains('belanja')) return Icons.shopping_bag;
     return Icons.category;
   }
 
   void _showNewCategoryDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return NewCategoryDialog(
-          isIncome: isIncome,
-          onCategorySaved: onCategorySelected
-        );
-      },
+      builder: (BuildContext context) => NewCategoryDialog(
+        isIncome: isIncome,
+        onCategorySaved: onCategorySelected,
+      ),
     );
   }
 }
@@ -155,26 +128,11 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
   final TextEditingController nameController = TextEditingController();
 
   final List<IconData> iconOptions = [
-    Icons.fastfood,
-    Icons.sports_esports,
-    Icons.movie,
-    Icons.directions_car,
-    Icons.home,
-    Icons.school,
-    Icons.pets,
-    Icons.fitness_center,
-    Icons.local_hospital,
-    Icons.flight,
-    Icons.weekend,
-    Icons.computer,
-    Icons.camera_alt,
-    Icons.music_note,
-    Icons.brush,
-    Icons.local_cafe,
-    Icons.restaurant,
-    Icons.store,
-    Icons.account_balance,
-    Icons.work,
+    Icons.fastfood, Icons.sports_esports, Icons.movie, Icons.directions_car,
+    Icons.home, Icons.school, Icons.pets, Icons.fitness_center,
+    Icons.local_hospital, Icons.flight, Icons.weekend, Icons.computer,
+    Icons.camera_alt, Icons.music_note, Icons.brush, Icons.local_cafe,
+    Icons.restaurant, Icons.store, Icons.account_balance, Icons.work,
   ];
 
   @override
@@ -186,7 +144,7 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.cardBackgroundPurple,
+      backgroundColor: AppColors.cardElevated,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -197,21 +155,19 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
             const Text(
               'Kategori Baru',
               style: TextStyle(
-                color: Color(0xFF333A44),
+                color: AppColors.textPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Pilih Ikon',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-            ),
+            const Text('Pilih Ikon',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14)),
             const SizedBox(height: 8),
             Container(
               height: 180,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: GridView.builder(
@@ -226,28 +182,18 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   final icon = iconOptions[index];
                   final isSelected = tempSelectedIcon == icon;
                   return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        tempSelectedIcon = icon;
-                      });
-                    },
+                    onTap: () => setState(() => tempSelectedIcon = icon),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.buttonBg
-                            : Colors.transparent,
+                        color: isSelected ? AppColors.roseBg : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected
-                              ? AppColors.textPrimary
-                              : Colors.transparent,
+                          color: isSelected ? AppColors.rose : Colors.transparent,
                         ),
                       ),
                       child: Icon(
                         icon,
-                        color: isSelected
-                            ? AppColors.textPrimary
-                            : Colors.grey[700],
+                        color: isSelected ? AppColors.rose : AppColors.textSecondary,
                       ),
                     ),
                   );
@@ -255,25 +201,22 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Nama Kategori',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-            ),
+            const Text('Nama Kategori',
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14)),
             const SizedBox(height: 8),
             TextField(
               controller: nameController,
+              style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.cardBackground,
                 hintText: 'Masukkan nama',
+                hintStyle: const TextStyle(color: AppColors.textHint),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 24),
@@ -281,33 +224,24 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonBg,
-                  foregroundColor: AppColors.textPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  backgroundColor: AppColors.rose,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onPressed: () {
-                  if (tempSelectedIcon != null &&
-                      nameController.text.isNotEmpty) {
+                  if (tempSelectedIcon != null && nameController.text.isNotEmpty) {
                     final categoryName = nameController.text.trim();
                     if (widget.isIncome) {
-                      OptionsService.instance.addExpenseCategory(categoryName); // Keep it simple for income
+                      OptionsService.instance.addExpenseCategory(categoryName);
                     } else {
-                      BudgetService.instance.addBudgetCategory(
-                        name: categoryName,
-                        limitAmount: 0,
-                      );
+                      BudgetService.instance.addBudgetCategory(name: categoryName, limitAmount: 0);
                     }
                     widget.onCategorySaved(categoryName);
                     Navigator.pop(context);
                   }
                 },
-                child: const Text(
-                  'Simpan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                child: const Text('Simpan', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],

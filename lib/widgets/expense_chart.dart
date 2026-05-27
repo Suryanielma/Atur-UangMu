@@ -1,6 +1,3 @@
-// Widget untuk menampilkan grafik pengeluaran mingguan di halaman dashboard. 
-//Grafik ini akan menampilkan total pengeluaran untuk setiap hari dalam seminggu, sehingga pengguna dapat dengan mudah melihat pola pengeluaran mereka.
-
 import 'package:flutter/material.dart';
 import '../data/in_memory_data_store.dart';
 import '../services/dashboard_service.dart';
@@ -24,8 +21,9 @@ class ExpenseChart extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.cardBackgroundPurple,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(
             children: [
@@ -51,8 +49,8 @@ class ExpenseChart extends StatelessWidget {
                           width: 25,
                           height: (values[index] / max) * 120,
                           decoration: BoxDecoration(
-                            color: AppColors.expenseRed,
-                            borderRadius: BorderRadius.circular(2),
+                            color: AppColors.rose,
+                            borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                         const SizedBox(height: 8),

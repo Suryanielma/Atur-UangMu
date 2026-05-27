@@ -22,8 +22,9 @@ class RecentTransactions extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.cardBackgroundPurple,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(
             children: [
@@ -49,7 +50,7 @@ class RecentTransactions extends StatelessWidget {
                     },
                     child: const Text(
                       'Lihat Semua',
-                      style: TextStyle(color: AppColors.expenseRed, fontSize: 14),
+                      style: TextStyle(color: AppColors.rose, fontSize: 14),
                     ),
                   ),
                 ],
@@ -62,7 +63,7 @@ class RecentTransactions extends StatelessWidget {
                   children: [
                     _buildTransaction(context, tx),
                     if (!isLastItem)
-                      const Divider(color: Colors.white, height: 24),
+                      const Divider(color: AppColors.borderSubtle, height: 24),
                   ],
                 );
               }),
