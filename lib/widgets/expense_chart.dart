@@ -21,9 +21,9 @@ class ExpenseChart extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color: AppColors.cardChart,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: AppColors.sand),
           ),
           child: Column(
             children: [
@@ -49,7 +49,7 @@ class ExpenseChart extends StatelessWidget {
                           width: 25,
                           height: (values[index] / max) * 120,
                           decoration: BoxDecoration(
-                            color: AppColors.rose,
+                            color: AppColors.sand,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),

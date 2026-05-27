@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../data/in_memory_data_store.dart';
 import '../models/budget_category_model.dart';
 import '../models/budget_settings_model.dart';
@@ -84,7 +83,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.cardElevated,
+        backgroundColor: AppColors.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Edit Budget', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         content: TextField(
@@ -102,34 +101,34 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () {
-              final budget =
-                  int.tryParse(controller.text) ?? settings.monthlyBudget;
-              
+              final budget = int.tryParse(controller.text) ?? settings.monthlyBudget;
               final summary = DashboardService.instance.getHomeSummary();
               if (budget > summary.totalIncome) {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Gagal', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                    title: const Text('Gagal', style: TextStyle(color: AppColors.expenseRed, fontWeight: FontWeight.bold)),
                     content: const Text('Budget tidak boleh melebihi total pemasukan saat ini!'),
                     actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('OK'),
-                      ),
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
                     ],
                   ),
                 );
                 return;
               }
-
               _budgetService.updateMonthlyBudget(budget);
               Navigator.pop(context);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.rose,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Simpan', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -152,9 +151,17 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             centerTitle: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
-              onPressed: () => Navigator.pop(context),
+            leading: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                margin: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderSubtle.withOpacity(0.3)),
+                ),
+                child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 16),
+              ),
             ),
           ),
           body: SingleChildScrollView(
@@ -188,18 +195,22 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     final progress = settings.monthlyBudget == 0
         ? 0.0
         : (totalPakaiGlobal / settings.monthlyBudget).clamp(0.0, 1.0);
-    final Color barColor = progress >= 1.0
-        ? AppColors.expenseRed
-        : progress >= 0.8
-            ? AppColors.warningAmber
-            : AppColors.incomeGreen;
+    
+    // Karena background sekarang merah, progress bar kita buat warna terang yang netral
+    final Color barColor = AppColors.surface;
 
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.rose, // Background diubah jadi Merah
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.rose.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          )
+        ]
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +223,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(9),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: AppColors.gradientPrimary, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      color: Colors.white.withOpacity(0.15), // Background transparan
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 18),
@@ -221,8 +232,8 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text('Budget Bulanan', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
-                      Text('Total limit pengeluaran', style: TextStyle(color: AppColors.textHint, fontSize: 11)),
+                      Text('Budget Bulanan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text('Total limit pengeluaran', style: TextStyle(color: Colors.white70, fontSize: 11)),
                     ],
                   ),
                 ],
@@ -232,9 +243,8 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.borderDefault),
                   ),
                   child: const Text('Edit', style: TextStyle(color: AppColors.rose, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
@@ -244,30 +254,22 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           const SizedBox(height: 20),
           Text(
             'Sisa: ${formatRupiah(remaining)}',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: remaining < 0 ? AppColors.expenseRed : AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 4),
-          Text('Total Budget: ${formatRupiah(settings.monthlyBudget)}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          Text('Total Budget: ${formatRupiah(settings.monthlyBudget)}', style: const TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.surface,
-              valueColor: AlwaysStoppedAnimation(barColor),
-              minHeight: 8,
-            ),
+            // Background bar diubah agar menyatu dengan merah
+            child: LinearProgressIndicator(value: progress, backgroundColor: Colors.white.withOpacity(0.2), valueColor: AlwaysStoppedAnimation(barColor), minHeight: 8),
           ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${(progress * 100).toInt()}% terpakai', style: const TextStyle(color: AppColors.textHint, fontSize: 11)),
-              Text(formatRupiah(totalPakaiGlobal), style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              Text('${(progress * 100).toInt()}% terpakai', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              Text(formatRupiah(totalPakaiGlobal), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
             ],
           ),
         ],
@@ -286,12 +288,20 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
 
   Widget _itemKategori(BudgetCategoryModel category, int index) {
     final isGreen = category.remainingAmount >= 0;
+    
+    // Override logic warna ungu dari model di sini
+    final Color categoryBarColor = category.progress >= 1.0
+        ? AppColors.expenseRed
+        : category.progress >= 0.8
+            ? AppColors.warningAmber
+            : AppColors.roseLight; // Warna bar diubah ke merah soft
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: AppColors.borderSubtle.withOpacity(0.3)),
       ),
       child: Column(
         children: [
@@ -314,7 +324,8 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
               ),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: AppColors.textHint),
-                color: AppColors.cardElevated,
+                color: AppColors.cardBackground,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 onSelected: (value) {
                   if (value == 'edit') _showEditCategoryDialog(index);
                   else if (value == 'hapus') _budgetService.deleteBudgetCategory(index);
@@ -335,10 +346,10 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
-              value: category.progress,
-              backgroundColor: AppColors.surface,
-              valueColor: AlwaysStoppedAnimation(category.progressColor),
-              minHeight: 7,
+              value: category.progress, 
+              backgroundColor: AppColors.surface, 
+              valueColor: AlwaysStoppedAnimation(categoryBarColor), // Memakai warna custom
+              minHeight: 7
             ),
           ),
           const SizedBox(height: 8),
@@ -359,13 +370,13 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: AppColors.borderSubtle.withOpacity(0.3)),
       ),
       child: Column(children: [
         _tilePengaturan(Icons.notifications_rounded, 'Notifikasi Budget', 'Peringatan saat mendekati limit', settings.notificationsEnabled, _budgetService.setNotifications),
-        Divider(height: 1, color: AppColors.borderSubtle),
+        Divider(height: 1, color: AppColors.borderSubtle.withOpacity(0.3)),
         _tilePengaturan(Icons.warning_amber_rounded, 'Peringatan 80%', 'Alert saat budget mencapai 80%', settings.alert80Enabled, _budgetService.setAlert80),
-        Divider(height: 1, color: AppColors.borderSubtle),
+        Divider(height: 1, color: AppColors.borderSubtle.withOpacity(0.3)),
         _tilePengaturan(Icons.refresh_rounded, 'Reset Otomatis', 'Reset budget setiap awal bulan', settings.autoResetEnabled, _budgetService.setAutoReset),
       ]),
     );
@@ -399,27 +410,13 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: AppColors.gradientSave, begin: Alignment.centerLeft, end: Alignment.centerRight),
+          gradient: const LinearGradient(colors: AppColors.gradientPrimary, begin: Alignment.centerLeft, end: Alignment.centerRight),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [BoxShadow(color: AppColors.rose.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 6))],
         ),
         child: const Center(
           child: Text('Simpan Pengaturan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
         ),
-      ),
-    );
-  }
-
-  Widget _gradientButton({required String label, required List<Color> colors, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: colors),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -434,10 +431,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
             onTap: onActionTap,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: AppColors.roseBg,
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(color: AppColors.roseBg, borderRadius: BorderRadius.circular(8)),
               child: Text(a, style: const TextStyle(color: AppColors.rose, fontWeight: FontWeight.w600, fontSize: 12)),
             ),
           ),
@@ -447,9 +441,9 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
 
   Widget _bottomNav() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        border: Border(top: BorderSide(color: AppColors.borderSubtle, width: 1)),
+        border: Border(top: BorderSide(color: AppColors.borderSubtle.withOpacity(0.3), width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: Colors.transparent,
@@ -517,7 +511,7 @@ class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget>
   Widget build(BuildContext context) {
     final title = widget.initialCategory == null ? 'Tambah Kategori' : 'Edit Kategori';
     return Dialog(
-      backgroundColor: AppColors.cardElevated,
+      backgroundColor: AppColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(22),
@@ -550,7 +544,7 @@ class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget>
                         duration: const Duration(milliseconds: 150),
                         decoration: BoxDecoration(
                           gradient: isSelected ? const LinearGradient(colors: AppColors.gradientPrimary) : null,
-                          color: isSelected ? null : AppColors.cardBackground,
+                          color: isSelected ? null : Colors.transparent,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(icon, color: isSelected ? Colors.white : AppColors.textSecondary, size: 20),
@@ -560,35 +554,9 @@ class _BudgetCategoryDialogWidgetState extends State<BudgetCategoryDialogWidget>
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nama Kategori',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
+              _styledField(_nameController, 'Nama Kategori'),
               const SizedBox(height: 12),
-              TextField(
-                controller: _limitController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Limit Budget',
-                  prefixText: 'Rp ',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
+              _styledField(_limitController, 'Limit Budget', prefix: 'Rp ', isNumber: true),
               const SizedBox(height: 24),
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 TextButton(

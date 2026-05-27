@@ -22,9 +22,9 @@ class RecentTransactions extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color: AppColors.rose,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: AppColors.roseLight),
           ),
           child: Column(
             children: [
@@ -34,7 +34,7 @@ class RecentTransactions extends StatelessWidget {
                   const Text(
                     'Transaksi Terakhir',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -50,7 +50,7 @@ class RecentTransactions extends StatelessWidget {
                     },
                     child: const Text(
                       'Lihat Semua',
-                      style: TextStyle(color: AppColors.rose, fontSize: 14),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),
                 ],
@@ -63,7 +63,7 @@ class RecentTransactions extends StatelessWidget {
                   children: [
                     _buildTransaction(context, tx),
                     if (!isLastItem)
-                      const Divider(color: AppColors.borderSubtle, height: 24),
+                      const Divider(color: Colors.white24, height: 24),
                   ],
                 );
               }),
@@ -83,8 +83,8 @@ class RecentTransactions extends StatelessWidget {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: transaction.iconBg,
-              child: Icon(transaction.icon, color: transaction.iconColor),
+              backgroundColor: Colors.white.withOpacity(0.2),
+              child: Icon(transaction.icon, color: Colors.white),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -94,7 +94,7 @@ class RecentTransactions extends StatelessWidget {
                   Text(
                     transaction.title,
                     style: const TextStyle(
-                      color: AppColors.textPrimary,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -103,7 +103,7 @@ class RecentTransactions extends StatelessWidget {
                   Text(
                     transaction.timeLabel,
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
+                      color: Colors.white70,
                       fontSize: 12,
                     ),
                   ),
@@ -114,8 +114,8 @@ class RecentTransactions extends StatelessWidget {
               formatSignedRupiah(transaction.amount),
               style: TextStyle(
                 color: transaction.isIncome
-                    ? AppColors.incomeGreen
-                    : AppColors.expenseRed,
+                    ? Colors.white
+                    : Colors.white70,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

@@ -63,7 +63,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             decoration: BoxDecoration(
               color: AppColors.cardBackground,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderSubtle),
+              border: Border.all(color: AppColors.borderSubtle.withOpacity(0.3)),
             ),
             child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 16),
           ),
@@ -108,7 +108,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.cardElevated,
+        color: AppColors.surface, // Menggunakan surface agar lebih soft
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -156,7 +156,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           color: isActive ? AppColors.cardBackground : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           boxShadow: isActive
-              ? [BoxShadow(color: AppColors.borderSubtle, blurRadius: 8, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: AppColors.borderSubtle.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
               : [],
         ),
         child: Row(
@@ -182,17 +182,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.rose,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.rose.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          )
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Jumlah Uang',
             style: TextStyle(
-              color: AppColors.textHint,
+              color: Colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -202,10 +208,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Rp',
                 style: TextStyle(
-                  color: AppColors.rose,
+                  color: Colors.white,
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
                 ),
@@ -215,7 +221,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 child: TextField(
                   controller: _amountController,
                   style: const TextStyle(
-                    color: AppColors.textPrimary,
+                    color: Colors.white,
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
@@ -225,7 +231,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     border: InputBorder.none,
                     hintText: '0',
                     hintStyle: TextStyle(
-                      color: AppColors.borderDefault,
+                      color: Colors.white38,
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
                     ),
@@ -285,10 +291,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         width: 72,
         padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.rose : AppColors.surface,
+          color: isSelected ? AppColors.rose : AppColors.surface, // Clean unselected state
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.rose : AppColors.borderSubtle,
+            color: isSelected ? AppColors.rose : Colors.transparent,
           ),
         ),
         child: Column(
@@ -378,10 +384,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.roseBg : AppColors.surface,
+          color: isSelected ? AppColors.roseBg : AppColors.surface, // Menggunakan RoseBg agar merahnya soft
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.roseLight : AppColors.borderSubtle,
+            color: isSelected ? AppColors.roseLight : Colors.transparent,
           ),
         ),
         child: Row(
@@ -390,10 +396,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.12),
+                color: isSelected ? Colors.white : AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: iconColor, size: 18),
+              child: Icon(icon, color: isSelected ? AppColors.rose : AppColors.textSecondary, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -431,11 +437,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Row(
             children: [
-              const Icon(Icons.calendar_month_rounded, color: AppColors.rose, size: 18),
+              const Icon(Icons.calendar_month_rounded, color: AppColors.textSecondary, size: 18),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -486,7 +491,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderSubtle),
         ),
         child: TextField(
           controller: _notesController,
@@ -502,13 +506,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
+  // Section card dibuat lebih menyatu dengan background dengan menipiskan border
   Widget _sectionCard({required String label, required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.cardBackground, 
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: AppColors.borderSubtle.withOpacity(0.4)), 
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.borderSubtle.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ]
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +578,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.borderSubtle),
+              border: Border.all(color: AppColors.borderSubtle.withOpacity(0.5)),
             ),
             child: const Center(
               child: Text(
@@ -598,9 +610,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final summary = DashboardService.instance.getHomeSummary();
       if (amount > summary.totalBalance) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Saldo tidak mencukupi untuk pengeluaran ini.'),
-          ),
+          const SnackBar(content: Text('Saldo tidak mencukupi untuk pengeluaran ini.')),
         );
         return;
       }
@@ -622,7 +632,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final settings = BudgetService.instance.getBudgetSettings();
       final totalUsed = BudgetService.instance.getBudgetSettingsTotalUsed();
       final budget = settings.monthlyBudget;
-      
+
       BudgetCategoryModel? category;
       try {
         category = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == selectedCategory);
@@ -630,83 +640,65 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       bool alertShown = false;
 
-      // 1. Cek Kategori Spesifik
       if (category != null && category.limitAmount > 0) {
         final ratio = category.usedAmount / category.limitAmount;
         if (settings.notificationsEnabled && ratio >= 1.0) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: Text('Peringatan: Budget kategori ${category.name} sudah habis!'),
-               backgroundColor: Colors.redAccent,
-               behavior: SnackBarBehavior.floating,
-               margin: EdgeInsets.only(
-                 bottom: MediaQuery.sizeOf(context).height - 180,
-                 left: 16,
-                 right: 16,
-               ),
-             ),
-           );
-           alertShown = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Peringatan: Budget kategori ${category.name} sudah habis!'),
+              backgroundColor: AppColors.expenseRed,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
+            ),
+          );
+          alertShown = true;
         } else if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: Text('Peringatan: Budget kategori ${category.name} sudah mencapai 80%!'),
-               backgroundColor: Colors.orange,
-               behavior: SnackBarBehavior.floating,
-               margin: EdgeInsets.only(
-                 bottom: MediaQuery.sizeOf(context).height - 180,
-                 left: 16,
-                 right: 16,
-               ),
-             ),
-           );
-           alertShown = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Peringatan: Budget kategori ${category.name} sudah mencapai 80%!'),
+              backgroundColor: AppColors.warningAmber,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
+            ),
+          );
+          alertShown = true;
         }
       }
 
-      // 2. Cek Total Budget
       if (!alertShown && budget > 0) {
         final ratio = totalUsed / budget;
         if (settings.notificationsEnabled && ratio >= 1.0) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: const Text('Peringatan: Budget bulanan Anda sudah habis!'),
-               backgroundColor: Colors.redAccent,
-               behavior: SnackBarBehavior.floating,
-               margin: EdgeInsets.only(
-                 bottom: MediaQuery.sizeOf(context).height - 180,
-                 left: 16,
-                 right: 16,
-               ),
-             ),
-           );
-           alertShown = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Peringatan: Budget bulanan Anda sudah habis!'),
+              backgroundColor: AppColors.expenseRed,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
+            ),
+          );
+          alertShown = true;
         } else if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-               content: const Text('Peringatan: Budget bulanan Anda sudah mencapai 80% dari limit!'),
-               backgroundColor: Colors.orange,
-               behavior: SnackBarBehavior.floating,
-               margin: EdgeInsets.only(
-                 bottom: MediaQuery.sizeOf(context).height - 180,
-                 left: 16,
-                 right: 16,
-               ),
-             ),
-           );
-           alertShown = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Peringatan: Budget bulanan Anda sudah mencapai 80% dari limit!'),
+              backgroundColor: AppColors.warningAmber,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
+            ),
+          );
+          alertShown = true;
         }
       }
 
       if (!alertShown) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Transaksi berhasil disimpan.')),
-         );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Transaksi berhasil disimpan.')),
+        );
       }
     } else {
-       ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('Transaksi berhasil disimpan.')),
-       );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaksi berhasil disimpan.')),
+      );
     }
 
     Navigator.pop(context);
@@ -714,9 +706,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildBottomNav() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        border: Border(top: BorderSide(color: AppColors.borderSubtle, width: 1)),
+        border: Border(top: BorderSide(color: AppColors.borderSubtle.withOpacity(0.3), width: 1)),
       ),
       child: BottomNavigationBar(
         backgroundColor: Colors.transparent,

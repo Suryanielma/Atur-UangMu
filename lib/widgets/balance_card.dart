@@ -25,9 +25,9 @@ class _BalanceCardState extends State<BalanceCard> {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color: AppColors.rose,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderSubtle),
+            border: Border.all(color: AppColors.roseLight),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +37,7 @@ class _BalanceCardState extends State<BalanceCard> {
                 children: [
                   const Text(
                     'Total Saldo',
-                    style: TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: Colors.white70),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -47,7 +47,7 @@ class _BalanceCardState extends State<BalanceCard> {
                     },
                     child: Icon(
                       _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-                      color: AppColors.textSecondary,
+                      color: Colors.white70,
                       size: 20,
                     ),
                   ),
@@ -57,7 +57,7 @@ class _BalanceCardState extends State<BalanceCard> {
               Text(
                 _isBalanceVisible ? formatRupiah(summary.totalBalance) : 'Rp *********',
                 style: const TextStyle(
-                  color: AppColors.textPrimary,
+                  color: Colors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
@@ -70,8 +70,6 @@ class _BalanceCardState extends State<BalanceCard> {
                       title: 'Pemasukan',
                       amount: _isBalanceVisible ? formatRupiah(summary.totalIncome) : 'Rp ******',
                       icon: Icons.arrow_downward,
-                      bgColor: AppColors.incomeBg,
-                      textColor: AppColors.incomeGreen,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -80,8 +78,6 @@ class _BalanceCardState extends State<BalanceCard> {
                       title: 'Pengeluaran',
                       amount: _isBalanceVisible ? formatRupiah(summary.totalExpense) : 'Rp ******',
                       icon: Icons.arrow_upward,
-                      bgColor: AppColors.expenseBg,
-                      textColor: AppColors.expenseRed,
                     ),
                   ),
                 ],
@@ -97,13 +93,11 @@ class _BalanceCardState extends State<BalanceCard> {
     required String title,
     required String amount,
     required IconData icon,
-    required Color bgColor,
-    required Color textColor,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -113,18 +107,18 @@ class _BalanceCardState extends State<BalanceCard> {
             children: [
               CircleAvatar(
                 radius: 10,
-                backgroundColor: AppColors.cardBackground,
-                child: Icon(icon, color: textColor, size: 14),
+                backgroundColor: Colors.white.withOpacity(0.25),
+                child: Icon(icon, color: Colors.white, size: 14),
               ),
               const SizedBox(width: 6),
-              Text(title, style: TextStyle(color: textColor, fontSize: 12)),
+              Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             amount,
-            style: TextStyle(
-              color: textColor,
+            style: const TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
