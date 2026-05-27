@@ -73,7 +73,7 @@ class CategoryDialog extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 32),
+            Icon(icon, color: AppColors.textSecondary, size: 22),
             const SizedBox(height: 8),
             Text(
               title,
@@ -94,6 +94,10 @@ class CategoryDialog extends StatelessWidget {
       } catch (_) {}
     }
     final lower = categoryName.toLowerCase();
+    if (lower.contains('gaji')) return Icons.work_outline_rounded;
+    if (lower.contains('bonus')) return Icons.card_giftcard_rounded;
+    if (lower.contains('investasi')) return Icons.show_chart_rounded;
+    if (lower.contains('lain')) return Icons.more_horiz_rounded;
     if (lower.contains('listrik')) return Icons.flash_on;
     if (lower.contains('air')) return Icons.water_drop;
     if (lower.contains('pulsa')) return Icons.smartphone;
