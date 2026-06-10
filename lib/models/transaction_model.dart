@@ -100,4 +100,44 @@ class TransactionModel {
         return today;
     }
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'category': category,
+      'timeLabel': timeLabel,
+      'amount': amount,
+      'groupLabel': groupLabel,
+      'iconCodePoint': icon.codePoint,
+      'iconFontFamily': icon.fontFamily,
+      'iconBg': iconBg.toARGB32(),
+      'iconColor': iconColor.toARGB32(),
+      'paymentMethod': paymentMethod,
+      'note': note,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
+
+  factory TransactionModel.fromMap(Map<dynamic, dynamic> map) {
+    return TransactionModel(
+      id: map['id'] as String,
+      title: map['title'] as String,
+      category: map['category'] as String,
+      timeLabel: map['timeLabel'] as String,
+      amount: map['amount'] as int,
+      groupLabel: map['groupLabel'] as String,
+      icon: IconData(
+        map['iconCodePoint'] as int,
+        fontFamily: map['iconFontFamily'] as String?,
+      ),
+      iconBg: Color(map['iconBg'] as int),
+      iconColor: Color(map['iconColor'] as int),
+      paymentMethod: map['paymentMethod'] as String,
+      note: map['note'] as String,
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'] as String)
+          : null,
+    );
+  }
 }

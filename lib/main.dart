@@ -1,9 +1,14 @@
 // File utama aplikasi yang menjalankan widget MyApp, yang merupakan titik masuk dari aplikasi
 
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'data/in_memory_data_store.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await InMemoryDataStore.instance.init();
   runApp(const MyApp());
 }
 
