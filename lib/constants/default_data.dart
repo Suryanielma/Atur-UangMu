@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-
 class DefaultData {
   static const String userDisplayName = 'Pengguna';
   static const String budgetWarningMessage =
@@ -26,15 +25,7 @@ class DefaultData {
   static const int budgetSettingsMonthlyLimit = 0;
   static const int budgetSettingsTotalUsed = 0;
 
-  static const List<double> weeklyExpenseValues = [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-  ];
+  static const List<double> weeklyExpenseValues = [0, 0, 0, 0, 0, 0, 0];
   static const List<String> weeklyExpenseDays = [
     'Sen',
     'Sel',

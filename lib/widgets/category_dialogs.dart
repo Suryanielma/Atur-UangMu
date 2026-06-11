@@ -12,9 +12,10 @@ class CategoryDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = isIncome
+    final rawCategories = isIncome
         ? _optionsService.getIncomeCategories()
         : BudgetService.instance.getBudgetCategories().map((c) => c.name).toList();
+    final categories = rawCategories.where((c) => c.toLowerCase() != 'lainnya').toList();
 
     return Dialog(
       backgroundColor: AppColors.cardElevated,
@@ -87,7 +88,12 @@ class CategoryDialog extends StatelessWidget {
   }
 
   IconData _resolveCategoryIcon(String categoryName) {
-    if (!isIncome && categoryName != 'Lainnya') {
+    if (isIncome) {
+      final icon = _optionsService.getIncomeCategoryIcon(categoryName);
+      if (icon != Icons.category_outlined && icon != Icons.category) {
+        return icon;
+      }
+    } else if (categoryName != 'Lainnya') {
       try {
         final found = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == categoryName);
         return found.icon;
@@ -237,9 +243,16 @@ class _NewCategoryDialogState extends State<NewCategoryDialog> {
                   if (tempSelectedIcon != null && nameController.text.isNotEmpty) {
                     final categoryName = nameController.text.trim();
                     if (widget.isIncome) {
-                      OptionsService.instance.addExpenseCategory(categoryName);
+                      OptionsService.instance.addIncomeCategory(
+                        categoryName,
+                        icon: tempSelectedIcon!,
+                      );
                     } else {
-                      BudgetService.instance.addBudgetCategory(name: categoryName, limitAmount: 0);
+                      BudgetService.instance.addBudgetCategory(
+                        name: categoryName,
+                        limitAmount: 0,
+                        icon: tempSelectedIcon!,
+                      );
                     }
                     widget.onCategorySaved(categoryName);
                     Navigator.pop(context);
