@@ -3,19 +3,33 @@ import '../data/in_memory_data_store.dart';
 import '../services/options_service.dart';
 import '../theme/app_colors.dart';
 
-class EWalletDialog extends StatelessWidget {
+class EWalletDialog extends StatefulWidget {
   final Function(String) onEWalletSelected;
+
+  const EWalletDialog({super.key, required this.onEWalletSelected});
+
+  @override
+  State<EWalletDialog> createState() => _EWalletDialogState();
+}
+
+class _EWalletDialogState extends State<EWalletDialog> {
   static final OptionsService _optionsService = OptionsService.instance;
   static final InMemoryDataStore _store = InMemoryDataStore.instance;
 
-  const EWalletDialog({super.key, required this.onEWalletSelected});
+  String _searchQuery = '';
+
+  List<String> _filterEWallets(List<String> eWallets) {
+    final query = _searchQuery.toLowerCase().trim();
+    if (query.isEmpty) return eWallets;
+    return eWallets.where((wallet) => wallet.toLowerCase().contains(query)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _store,
       builder: (context, _) {
-        final eWallets = _optionsService.getEWalletOptions();
+        final eWallets = _filterEWallets(_optionsService.getEWalletOptions());
         return Dialog(
           backgroundColor: Colors.transparent,
           child: Container(
@@ -34,8 +48,10 @@ class EWalletDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.borderSubtle),
                   ),
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
                       icon: Icon(Icons.search, color: AppColors.textHint),
                       hintText: 'Cari E-Wallet....',
                       border: InputBorder.none,
@@ -69,13 +85,23 @@ class EWalletDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: eWallets.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) =>
-                        _buildEWalletItem(eWallets[index], context),
-                  ),
+                  child: eWallets.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              'E-Wallet tidak ditemukan',
+                              style: TextStyle(color: AppColors.textHint),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: eWallets.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) =>
+                              _buildEWalletItem(eWallets[index], context),
+                        ),
                 ),
               ],
             ),
@@ -88,7 +114,7 @@ class EWalletDialog extends StatelessWidget {
   Widget _buildEWalletItem(String name, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onEWalletSelected(name);
+        widget.onEWalletSelected(name);
         Navigator.pop(context);
       },
       child: Container(
@@ -184,7 +210,7 @@ class EWalletDialog extends StatelessWidget {
                       if (newEWalletName.trim().isNotEmpty) {
                         final walletName = newEWalletName.trim();
                         _optionsService.addEWalletOption(walletName);
-                        onEWalletSelected(walletName);
+                        widget.onEWalletSelected(walletName);
                         Navigator.pop(context);
                         Navigator.pop(context);
                       }

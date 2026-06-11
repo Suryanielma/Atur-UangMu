@@ -12,6 +12,7 @@ import 'budget_settings_screen.dart';
 import '../services/budget_service.dart';
 import '../services/dashboard_service.dart';
 import '../models/budget_category_model.dart';
+import '../utils/budget_notification_helper.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -628,7 +629,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   // --- BAGIAN YANG DIPERBAIKI: Validasi Strict Limit Budget ---
-  void _saveTransaction() {
+  Future<void> _saveTransaction() async {
     final amount = _transactionService.parseAmount(_amountController.text);
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -707,56 +708,46 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       note: _notesController.text.trim(),
     );
 
-    // Menampilkan notifikasi peringatan jika mencapai 80%
+    final alertMessages = <String>[];
+
     if (!isIncome) {
       final settings = BudgetService.instance.getBudgetSettings();
       final totalUsedAfterSave = BudgetService.instance.getBudgetSettingsTotalUsed();
       final budget = settings.monthlyBudget;
 
-      BudgetCategoryModel? category;
-      try {
-        category = BudgetService.instance.getBudgetCategories().firstWhere((c) => c.name == selectedCategory);
-      } catch (_) {}
+      if (settings.notificationsEnabled) {
+        BudgetCategoryModel? categoryAfter;
+        try {
+          categoryAfter = BudgetService.instance
+              .getBudgetCategories()
+              .firstWhere((c) => c.name == selectedCategory);
+        } catch (_) {}
 
-      bool alert80Shown = false;
+        if (categoryAfter != null && categoryAfter.limitAmount > 0) {
+          final ratio = categoryAfter.usedAmount / categoryAfter.limitAmount;
+          if (ratio >= 1.0) {
+            alertMessages.add('Budget kategori ${categoryAfter.name} sudah habis!');
+          } else if (settings.alert80Enabled && ratio >= 0.8) {
+            alertMessages.add(
+              'Budget kategori ${categoryAfter.name} mencapai ${(ratio * 100).toInt()}%!',
+            );
+          }
+        }
 
-      // Cek Peringatan 80% Kategori
-      if (category != null && category.limitAmount > 0) {
-        final ratio = category.usedAmount / category.limitAmount;
-        if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Peringatan: Budget kategori ${category.name} sudah mencapai ${(ratio*100).toInt()}%!'),
-              backgroundColor: AppColors.warningAmber,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
-            ),
-          );
-          alert80Shown = true;
+        if (budget > 0) {
+          final ratio = totalUsedAfterSave / budget;
+          if (ratio >= 1.0) {
+            alertMessages.add('Budget bulanan Anda sudah habis!');
+          } else if (settings.alert80Enabled && ratio >= 0.8) {
+            alertMessages.add('Budget bulanan mencapai ${(ratio * 100).toInt()}%!');
+          }
         }
       }
+    }
 
-      // Cek Peringatan 80% Bulanan
-      if (!alert80Shown && budget > 0) {
-        final ratio = totalUsedAfterSave / budget;
-        if (settings.alert80Enabled && ratio >= 0.8 && ratio < 1.0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Peringatan: Budget bulanan Anda sudah mencapai ${(ratio*100).toInt()}%!'),
-              backgroundColor: AppColors.warningAmber,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.only(bottom: MediaQuery.sizeOf(context).height - 180, left: 16, right: 16),
-            ),
-          );
-          alert80Shown = true;
-        }
-      }
-
-      if (!alert80Shown) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Transaksi berhasil disimpan.')),
-        );
-      }
+    if (alertMessages.isNotEmpty) {
+      await showBudgetAlertDialog(context, messages: alertMessages);
+      if (!context.mounted) return;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Transaksi berhasil disimpan.')),

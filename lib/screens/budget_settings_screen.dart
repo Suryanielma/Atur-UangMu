@@ -35,6 +35,14 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
     final categories = _budgetService.getBudgetCategories();
     if (index < 0 || index >= categories.length) return;
     final category = categories[index];
+    if (category.progress >= 0.8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Edit kategori tidak tersedia karena penggunaan sudah mencapai 80%.'),
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) => BudgetCategoryDialogWidget(
@@ -330,10 +338,22 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen> {
                   if (value == 'edit') _showEditCategoryDialog(index);
                   else if (value == 'hapus') _budgetService.deleteBudgetCategory(index);
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'edit', child: Text('Edit', style: TextStyle(color: AppColors.textPrimary))),
-                  const PopupMenuItem(value: 'hapus', child: Text('Hapus', style: TextStyle(color: AppColors.expenseRed))),
-                ],
+                itemBuilder: (context) {
+                  final canEdit = category.progress < 0.8;
+                  return [
+                    PopupMenuItem(
+                      value: 'edit',
+                      enabled: canEdit,
+                      child: Text(
+                        'Edit',
+                        style: TextStyle(
+                          color: canEdit ? AppColors.textPrimary : AppColors.textHint,
+                        ),
+                      ),
+                    ),
+                    const PopupMenuItem(value: 'hapus', child: Text('Hapus', style: TextStyle(color: AppColors.expenseRed))),
+                  ];
+                },
               ),
             ],
           ),

@@ -3,19 +3,33 @@ import '../data/in_memory_data_store.dart';
 import '../services/options_service.dart';
 import '../theme/app_colors.dart';
 
-class BankDialog extends StatelessWidget {
+class BankDialog extends StatefulWidget {
   final Function(String) onBankSelected;
+
+  const BankDialog({super.key, required this.onBankSelected});
+
+  @override
+  State<BankDialog> createState() => _BankDialogState();
+}
+
+class _BankDialogState extends State<BankDialog> {
   static final OptionsService _optionsService = OptionsService.instance;
   static final InMemoryDataStore _store = InMemoryDataStore.instance;
 
-  const BankDialog({super.key, required this.onBankSelected});
+  String _searchQuery = '';
+
+  List<String> _filterBanks(List<String> banks) {
+    final query = _searchQuery.toLowerCase().trim();
+    if (query.isEmpty) return banks;
+    return banks.where((bank) => bank.toLowerCase().contains(query)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _store,
       builder: (context, _) {
-        final banks = _optionsService.getBankOptions();
+        final banks = _filterBanks(_optionsService.getBankOptions());
         return Dialog(
           backgroundColor: Colors.transparent,
           child: Container(
@@ -34,8 +48,10 @@ class BankDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.borderSubtle),
                   ),
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
                       icon: Icon(Icons.search, color: AppColors.textHint),
                       hintText: 'Cari Bank....',
                       border: InputBorder.none,
@@ -68,13 +84,23 @@ class BankDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: banks.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) =>
-                        _buildBankItem(banks[index], context),
-                  ),
+                  child: banks.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              'Bank tidak ditemukan',
+                              style: TextStyle(color: AppColors.textHint),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: banks.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) =>
+                              _buildBankItem(banks[index], context),
+                        ),
                 ),
               ],
             ),
@@ -87,7 +113,7 @@ class BankDialog extends StatelessWidget {
   Widget _buildBankItem(String name, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        onBankSelected(name);
+        widget.onBankSelected(name);
         Navigator.pop(context);
       },
       child: Container(
@@ -179,7 +205,7 @@ class BankDialog extends StatelessWidget {
                       if (newBankName.trim().isNotEmpty) {
                         final bankName = newBankName.trim();
                         _optionsService.addBankOption(bankName);
-                        onBankSelected(bankName);
+                        widget.onBankSelected(bankName);
                         Navigator.pop(context);
                         Navigator.pop(context);
                       }

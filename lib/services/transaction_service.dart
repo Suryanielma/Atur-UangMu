@@ -36,10 +36,14 @@ class TransactionService {
           final category = tx.category.toLowerCase();
           final paymentMethod = tx.paymentMethod.toLowerCase();
 
+          final note = tx.note.toLowerCase();
+
           final matchesQuery =
               normalizedQuery.isEmpty ||
               title.contains(normalizedQuery) ||
-              category.contains(normalizedQuery);
+              category.contains(normalizedQuery) ||
+              paymentMethod.contains(normalizedQuery) ||
+              note.contains(normalizedQuery);
 
           if (!matchesQuery) return false;
 
